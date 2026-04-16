@@ -47,6 +47,9 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 
+# Copy DB init script
+COPY --from=builder /app/scripts/init-db.cjs ./scripts/init-db.cjs
+
 # Create uploads directory
 RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
 
