@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  TECHNICIAN
+  BRARUDI
+  BRARUDI_MGMT
+}
+
+enum InterventionType {
+  MAINTENANCE
+  REPAIR
+}
+
+enum InterventionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum FridgeStatus {
+  ACTIVE
+  INACTIVE
+  UNDER_REPAIR
+}
+
+model User {
+  id           String         @id @default(cuid())
+  fullName     String
+  email        String         @unique
+  passwordHash String
+  role         Role
+  active       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  interventions    Intervention[]
+  assignedRequests ServiceRequest[] @relation("ServiceRequestAssignee")
+  createdRequests  ServiceRequest[] @relation("ServiceRequestCreator")
+
+  @@map("users")
+}
+
+model City {
+  id         String   @id @default(cuid())
+  externalId String?  @unique
+  name       String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  posList    Pos[]
+
+  @@map("cities")
+}
+
+model Pos {
+  id            String         @id @default(cuid())
+  cityId        String
+  posName       String
+  channel       String?
+  owner         String?
+  phoneNumber   String?
+  state         String?
+  neighbourhood String?
+  idNumber      String?
+  streetNo      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  city            City             @relation(fields: [cityId], references: [id])
+  refrigerators   Refrigerator[]
+  serviceRequests ServiceRequest[]
+
+  @@map("pos")
+}
+
+model Refrigerator {
+  id               String         @id @default(cuid())
+  posId            String
+  refrigeratorType String?
+  brand            String?
+  serialNumber     String         @unique
+  status           FridgeStatus   @default(ACTIVE)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  pos              Pos              @relation(fields: [posId], references: [id])
+  interventions    Intervention[]
+  serviceRequests  ServiceRequest[]
+
+  @@map("refrigerators")
+}
+
+model Intervention {
+  id               String             @id @default(cuid())
+  refrigeratorId   String
+  technicianId     String
+  serviceRequestId String?
+  type             InterventionType
+  interventionDate DateTime
+  issueDescription String?
+  workDone         String?
+  status           InterventionStatus @default(PENDING)
+  notes            String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  refrigerator     Refrigerator       @relation(fields: [refrigeratorId], references: [id])
+  technician       User               @relation(fields: [technicianId], references: [id])
+  serviceRequest   ServiceRequest?    @relation(fields: [serviceRequestId], references: [id])
+  costItems        InterventionCostItem[]
+
+  @@map("interventions")
+}
+
+model InterventionCostItem {
+  id             String       @id @default(cuid())
+  interventionId String
+  itemName       String
+  quantity       Int          @default(1)
+  unitCost       Float        @default(0)
+  totalCost      Float        @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  intervention   Intervention @relation(fields: [interventionId], references: [id], onDelete: Cascade)
+
+  @@map("intervention_cost_items")
+}
+
+enum ServiceRequestType {
+  REPAIR
+  MAINTENANCE
+}
+
+enum ServiceRequestUrgency {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ServiceRequestStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CANCELLED
+}
+
+model ServiceRequest {
+  id               String               @id @default(cuid())
+  refrigeratorId   String
+  posId            String
+  createdById      String?
+  type             ServiceRequestType
+  urgency          ServiceRequestUrgency @default(MEDIUM)
+  description      String
+  contactName      String?
+  contactPhone     String?
+  status           ServiceRequestStatus  @default(PENDING)
+  assignedToId     String?
+  assignedAt       DateTime?
+  resolvedAt       DateTime?
+  adminNotes       String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  refrigerator     Refrigerator         @relation(fields: [refrigeratorId], references: [id])
+  pos              Pos                  @relation(fields: [posId], references: [id])
+  createdBy        User?                @relation("ServiceRequestCreator", fields: [createdById], references: [id])
+  assignedTo       User?                @relation("ServiceRequestAssignee", fields: [assignedToId], references: [id])
+  interventions    Intervention[]
+
+  @@map("service_requests")
+}

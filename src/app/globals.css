@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ═══════════════════════════════════════════════════════════
+   ACCESSIBILITY & TYPOGRAPHY SYSTEM
+   Single font: Inter — minimum 14px text — improved readability
+   ═══════════════════════════════════════════════════════════ */
+
+@theme {
+  /* Enforce minimum 14px on the smallest utility class */
+  --font-size-xs: 0.875rem;          /* 12px → 14px */
+  --font-size-xs--line-height: 1.5;
+
+  /* Bump sm for better body readability (14px → 15px) */
+  --font-size-sm: 0.9375rem;         /* 15px */
+  --font-size-sm--line-height: 1.55;
+
+  /* Mono font → Inter for single-font rule, with tabular nums */
+  --font-mono: "Inter", ui-monospace, monospace;
+}
+
+/* ──── Base typography ──── */
+body {
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Headings: clear hierarchy through weight and size */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* Paragraphs and body text blocks */
+p, li, dd, blockquote {
+  line-height: 1.7;
+}
+
+/* ──── Accessibility: Focus states ──── */
+*:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove default focus outline only when focus-visible handles it */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ──── Accessibility: Minimum touch/click targets ──── */
+button,
+a,
+[role="button"],
+summary {
+  min-height: 32px;
+  min-width: 32px;
+}
+
+/* Inputs & selects: comfortable click/tap target */
+input, select, textarea {
+  min-height: 36px;
+}
+
+/* ──── Accessibility: Zoom support up to 200% ──── */
+html {
+  overflow-x: hidden;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+@media (min-width: 1px) {
+  /* Prevent horizontal scroll at high zoom */
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+}
+
+/* ──── Accessibility: Reduced motion ──── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ──── Accessibility: High contrast mode support ──── */
+@media (forced-colors: active) {
+  * {
+    border-color: currentColor;
+  }
+}
+
+/* ──── Hide scrollbar utility ──── */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Smooth transitions */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Safe area for mobile bottom nav (iPhone notch/home indicator) */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.08);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.15);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* Leaflet overrides */
+.leaflet-container {
+  font-family: 'Inter', sans-serif !important;
+  width: 100%;
+  height: 100%;
+}
+.leaflet-popup-content-wrapper,
+.dark-popup .leaflet-popup-content-wrapper {
+  background: #141414 !important;
+  color: #e2e8f0 !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+.leaflet-popup-content {
+  margin: 10px 14px !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: #e2e8f0 !important;
+}
+.leaflet-popup-tip {
+  background: #141414 !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+}
+
+/* Context menu on map */
+.map-context-menu {
+  background: #141414;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 6px 0;
+  min-width: 200px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 1000;
+}
+.map-context-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: all 0.1s;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.map-context-menu button:hover {
+  background: rgba(255,255,255,0.06);
+  color: #e2e8f0;
+}
+.map-context-menu .separator {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 4px 0;
+}

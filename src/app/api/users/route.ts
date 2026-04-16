@@ -1,0 +1,64 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import bcrypt from "bcryptjs";
+
+/* ── GET /api/users ── admin-only: list all users ── */
+export async function GET(request: NextRequest) {
+  const role = request.headers.get("x-user-role");
+  if (role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const users = await prisma.user.findMany({
+    select: { id: true, fullName: true, email: true, role: true, active: true, createdAt: true },
+    orderBy: [{ role: "asc" }, { fullName: "asc" }],
+  });
+
+  return NextResponse.json(users);
+}
+
+/* ── POST /api/users ── admin-only: create a new account ── */
+export async function POST(request: NextRequest) {
+  const role = request.headers.get("x-user-role");
+  if (role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const body = await request.json();
+  const { fullName, email, userRole, password } = body;
+
+  if (!fullName || !email || !userRole || !password) {
+    return NextResponse.json({ error: "fullName, email, role, and password are required" }, { status: 400 });
+  }
+
+  if (!["ADMIN", "TECHNICIAN", "BRARUDI"].includes(userRole)) {
+    return NextResponse.json({ error: "Invalid role" }, { status: 400 });
+  }
+
+  // Password must be at least 8 chars
+  if (password.length < 8) {
+    return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+  }
+
+  const normalizedEmail = email.toLowerCase().trim();
+
+  const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (existing) {
+    return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+
+  const user = await prisma.user.create({
+    data: {
+      fullName: fullName.trim(),
+      email: normalizedEmail,
+      passwordHash,
+      role: userRole,
+      active: true,
+    },
+    select: { id: true, fullName: true, email: true, role: true, active: true, createdAt: true },
+  });
+
+  return NextResponse.json(user, { status: 201 });
+}
