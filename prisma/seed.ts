@@ -20,9 +20,10 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "cabufrigo@cabu.bi" },
-    update: {},
+    update: { username: "cabufrigo" },
     create: {
       fullName: "CabuFrigo",
+      username: "cabufrigo",
       email: "cabufrigo@cabu.bi",
       passwordHash: cabuAdminPassword,
       role: "ADMIN",
@@ -31,9 +32,10 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "admin@cabu.bi" },
-    update: {},
+    update: { username: "admin" },
     create: {
       fullName: "Jean-Pierre Ndayishimiye",
+      username: "admin",
       email: "admin@cabu.bi",
       passwordHash: adminPassword,
       role: "ADMIN",
@@ -42,9 +44,10 @@ async function main() {
 
   const tech1 = await prisma.user.upsert({
     where: { email: "emmanuel@cabu.bi" },
-    update: {},
+    update: { username: "emmanuel" },
     create: {
       fullName: "Emmanuel Niyonzima",
+      username: "emmanuel",
       email: "emmanuel@cabu.bi",
       passwordHash: techPassword,
       role: "TECHNICIAN",
@@ -53,9 +56,10 @@ async function main() {
 
   const tech2 = await prisma.user.upsert({
     where: { email: "pascal@cabu.bi" },
-    update: {},
+    update: { username: "pascal" },
     create: {
       fullName: "Pascal Hakizimana",
+      username: "pascal",
       email: "pascal@cabu.bi",
       passwordHash: techPassword,
       role: "TECHNICIAN",
@@ -64,9 +68,10 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "monitor@brarudi.bi" },
-    update: {},
+    update: { username: "marie" },
     create: {
       fullName: "Marie Irakoze",
+      username: "marie",
       email: "monitor@brarudi.bi",
       passwordHash: brarudiPassword,
       role: "BRARUDI",

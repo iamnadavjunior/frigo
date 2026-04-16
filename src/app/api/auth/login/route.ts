@@ -5,13 +5,16 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+    if (!username || !password) {
+      return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
+    const input = username.toLowerCase().trim();
+    const user = input.includes("@")
+      ? await prisma.user.findUnique({ where: { email: input } })
+      : await prisma.user.findUnique({ where: { username: input } });
 
     if (!user || !user.active) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });

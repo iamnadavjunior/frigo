@@ -32,6 +32,7 @@ type Tab = "profile" | "team" | "import";
 interface TeamUser {
   id: string;
   fullName: string;
+  username: string;
   email: string;
   role: string;
   active: boolean;
@@ -186,12 +187,13 @@ export default function SettingsPage() {
   const [teamLoading, setTeamLoading] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createName, setCreateName] = useState("");
+  const [createUsername, setCreateUsername] = useState("");
   const [createEmail, setCreateEmail] = useState("");
   const [createRole, setCreateRole] = useState("TECHNICIAN");
   const [createPassword, setCreatePassword] = useState(() => generatePassword());
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState("");
-  const [createdCreds, setCreatedCreds] = useState<{ name: string; email: string; password: string } | null>(null);
+  const [createdCreds, setCreatedCreds] = useState<{ name: string; username: string; email: string; password: string } | null>(null);
   const [copiedCreds, setCopiedCreds] = useState(false);
   const [resetTarget, setResetTarget] = useState<{ id: string; name: string } | null>(null);
   const [resetPassword, setResetPassword] = useState("");
@@ -220,16 +222,17 @@ export default function SettingsPage() {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName: createName, email: createEmail, userRole: createRole, password: createPassword }),
+        body: JSON.stringify({ fullName: createName, username: createUsername, email: createEmail, userRole: createRole, password: createPassword }),
       });
       if (!res.ok) {
         const d = await res.json();
         throw new Error(d.error || "Failed to create account");
       }
-      const saved = { name: createName, email: createEmail, password: createPassword };
+      const saved = { name: createName, username: createUsername, email: createEmail, password: createPassword };
       setCreatedCreds(saved);
       setCopiedCreds(false);
       setCreateName("");
+      setCreateUsername("");
       setCreateEmail("");
       setCreateRole("TECHNICIAN");
       setCreatePassword(generatePassword());
@@ -367,13 +370,14 @@ export default function SettingsPage() {
                   <button onClick={() => setCreatedCreds(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg leading-none">&times;</button>
                 </div>
                 <div className="bg-white dark:bg-[#141414] rounded-lg border border-green-500/20 p-3 font-mono text-sm space-y-1">
-                  <div><span className="text-gray-400">Name:&nbsp;&nbsp;&nbsp;</span><span className="text-gray-800 dark:text-gray-200 font-semibold">{createdCreds.name}</span></div>
-                  <div><span className="text-gray-400">Email:&nbsp;&nbsp;&nbsp;</span><span className="text-gray-800 dark:text-gray-200">{createdCreds.email}</span></div>
+                  <div><span className="text-gray-400">Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span className="text-gray-800 dark:text-gray-200 font-semibold">{createdCreds.name}</span></div>
+                  <div><span className="text-gray-400">Username: </span><span className="text-gray-800 dark:text-gray-200">{createdCreds.username}</span></div>
+                  <div><span className="text-gray-400">Email:&nbsp;&nbsp;&nbsp;&nbsp;</span><span className="text-gray-800 dark:text-gray-200">{createdCreds.email}</span></div>
                   <div><span className="text-gray-400">Password: </span><span className="text-gray-800 dark:text-gray-200 font-bold tracking-wider">{createdCreds.password}</span></div>
                 </div>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(`Name: ${createdCreds.name}\nEmail: ${createdCreds.email}\nPassword: ${createdCreds.password}`);
+                    navigator.clipboard.writeText(`Name: ${createdCreds.name}\nUsername: ${createdCreds.username}\nEmail: ${createdCreds.email}\nPassword: ${createdCreds.password}`);
                     setCopiedCreds(true);
                     setTimeout(() => setCopiedCreds(false), 2500);
                   }}
@@ -441,6 +445,17 @@ export default function SettingsPage() {
                         value={createName}
                         onChange={(e) => setCreateName(e.target.value)}
                         placeholder="e.g. Jean Ndayishimiye"
+                        className="w-full px-3 py-2 bg-gray-50 dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-lg text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Username *</label>
+                      <input
+                        type="text"
+                        required
+                        value={createUsername}
+                        onChange={(e) => setCreateUsername(e.target.value)}
+                        placeholder="e.g. jean"
                         className="w-full px-3 py-2 bg-gray-50 dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-lg text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                       />
                     </div>

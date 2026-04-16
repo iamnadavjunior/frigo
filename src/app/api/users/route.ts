@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   }
 
   const users = await prisma.user.findMany({
-    select: { id: true, fullName: true, email: true, role: true, active: true, createdAt: true },
+    select: { id: true, fullName: true, username: true, email: true, role: true, active: true, createdAt: true },
     orderBy: [{ role: "asc" }, { fullName: "asc" }],
   });
 
@@ -25,10 +25,10 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json();
-  const { fullName, email, userRole, password } = body;
+  const { fullName, username, email, userRole, password } = body;
 
-  if (!fullName || !email || !userRole || !password) {
-    return NextResponse.json({ error: "fullName, email, role, and password are required" }, { status: 400 });
+  if (!fullName || !username || !email || !userRole || !password) {
+    return NextResponse.json({ error: "fullName, username, email, role, and password are required" }, { status: 400 });
   }
 
   if (!["ADMIN", "TECHNICIAN", "BRARUDI"].includes(userRole)) {
@@ -40,10 +40,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
   }
 
+  const normalizedUsername = username.toLowerCase().trim();
   const normalizedEmail = email.toLowerCase().trim();
 
-  const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-  if (existing) {
+  const existingUsername = await prisma.user.findUnique({ where: { username: normalizedUsername } });
+  if (existingUsername) {
+    return NextResponse.json({ error: "An account with this username already exists" }, { status: 409 });
+  }
+
+  const existingEmail = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+  if (existingEmail) {
     return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
   }
 
@@ -52,12 +58,13 @@ export async function POST(request: NextRequest) {
   const user = await prisma.user.create({
     data: {
       fullName: fullName.trim(),
+      username: normalizedUsername,
       email: normalizedEmail,
       passwordHash,
       role: userRole,
       active: true,
     },
-    select: { id: true, fullName: true, email: true, role: true, active: true, createdAt: true },
+    select: { id: true, fullName: true, username: true, email: true, role: true, active: true, createdAt: true },
   });
 
   return NextResponse.json(user, { status: 201 });
