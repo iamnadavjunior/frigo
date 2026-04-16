@@ -138,7 +138,7 @@ export default function ImportPage() {
 
       {/* Upload Step */}
       {step === "upload" && (
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-6">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-6">
           <h2 className="text-sm font-medium text-gray-400 mb-4">Upload Excel File</h2>
           <p className="text-sm text-gray-500 mb-4">
             Upload an Excel file (.xlsx, .xls) or CSV containing the refrigerator database.
@@ -146,7 +146,7 @@ export default function ImportPage() {
             Neighbourhood, ID Number, Street, Refrigerator Type, Brand, and Serial Number.
           </p>
 
-          <div className="border-2 border-dashed border-gray-200 dark:border-white/[0.06] rounded-lg p-8 text-center">
+          <div className="border-2 border-dashed border-gray-200 dark:border-white/6 rounded-lg p-8 text-center">
             <input
               type="file"
               onChange={handleFileSelect}
@@ -218,11 +218,11 @@ export default function ImportPage() {
           )}
 
           {/* Data preview table */}
-          <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] overflow-hidden">
+          <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 overflow-hidden">
             <div className="overflow-x-auto max-h-96">
               <table className="w-full text-xs">
                 <thead className="sticky top-0">
-                  <tr className="bg-white dark:bg-[#141414] border-b border-gray-200 dark:border-white/[0.06]">
+                  <tr className="bg-white dark:bg-[#141414] border-b border-gray-200 dark:border-white/6">
                     <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Row</th>
                     <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">City</th>
                     <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">POS Name</th>
@@ -233,7 +233,7 @@ export default function ImportPage() {
                     <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Serial Number</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.04]">
+                <tbody className="divide-y divide-gray-100 dark:divide-white/4">
                   {rows.slice(0, 100).map((row) => (
                     <tr key={row.rowIndex} className="hover:bg-gray-50 dark:hover:bg-white/5">
                       <td className="px-3 py-1.5 text-gray-500">{row.rowIndex}</td>
@@ -250,7 +250,7 @@ export default function ImportPage() {
               </table>
             </div>
             {rows.length > 100 && (
-              <div className="px-3 py-2 text-xs text-gray-500 bg-gray-50 dark:bg-white/[0.02] border-t border-gray-200 dark:border-white/[0.06]">
+              <div className="px-3 py-2 text-xs text-gray-500 bg-gray-50 dark:bg-white/2 border-t border-gray-200 dark:border-white/6">
                 Showing first 100 of {rows.length} rows
               </div>
             )}
@@ -260,7 +260,7 @@ export default function ImportPage() {
 
       {/* Done Step */}
       {step === "done" && result && (
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-6">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Import Complete</h2>
 
           <div className="grid grid-cols-3 gap-4 mb-6">
@@ -272,7 +272,7 @@ export default function ImportPage() {
               <div className="text-2xl font-bold text-orange-400">{result.skipped}</div>
               <div className="text-sm text-orange-400/70">Skipped</div>
             </div>
-            <div className="bg-gray-50 dark:bg-white/[0.04] rounded-lg p-4 text-center">
+            <div className="bg-gray-50 dark:bg-white/4 rounded-lg p-4 text-center">
               <div className="text-2xl font-bold text-gray-800 dark:text-gray-200">{result.total}</div>
               <div className="text-sm text-gray-500">Total</div>
             </div>

@@ -39,7 +39,7 @@ interface Intervention {
 
 function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
   return (
-    <div className="flex justify-between py-2 border-b border-gray-100 dark:border-white/[0.06]">
+    <div className="flex justify-between py-2 border-b border-gray-100 dark:border-white/6">
       <span className="text-sm text-gray-500">{label}</span>
       <span className="text-sm text-gray-800 dark:text-gray-200 font-medium">{value || "—"}</span>
     </div>
@@ -49,10 +49,10 @@ function InfoRow({ label, value }: { label: string; value: string | null | undef
 function statusColor(status: string) {
   const colors: Record<string, string> = {
     ACTIVE: "text-green-400 bg-green-500/10",
-    INACTIVE: "text-gray-400 bg-white dark:bg-white/[0.06]",
+    INACTIVE: "text-gray-400 bg-white dark:bg-white/6",
     UNDER_REPAIR: "text-orange-400 bg-orange-500/10",
   };
-  return colors[status] || "text-gray-400 bg-white dark:bg-white/[0.06]";
+  return colors[status] || "text-gray-400 bg-white dark:bg-white/6";
 }
 
 export default function PosDetailPage() {
@@ -87,7 +87,7 @@ export default function PosDetailPage() {
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         {/* POS Info */}
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-4">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-4">
           <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">POS Information</h2>
           <InfoRow label="POS Name" value={pos.posName} />
           <InfoRow label="Owner" value={pos.owner} />
@@ -101,7 +101,7 @@ export default function PosDetailPage() {
         </div>
 
         {/* Refrigerators */}
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-4">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-4">
           <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Refrigerators ({pos.refrigerators.length})
           </h2>
@@ -113,7 +113,7 @@ export default function PosDetailPage() {
                 <Link
                   key={fridge.id}
                   href={`/refrigerators/${fridge.id}`}
-                  className="block p-3 rounded border border-gray-200 dark:border-white/[0.06] hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  className="block p-3 rounded border border-gray-200 dark:border-white/6 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -139,14 +139,14 @@ export default function PosDetailPage() {
       {/* Recent Interventions */}
       <div>
         <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Recent Interventions</h2>
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] overflow-hidden">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 overflow-hidden">
           {interventions.length === 0 ? (
             <div className="px-4 py-8 text-center text-gray-500 text-sm">No interventions yet</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-white/[0.06]">
+                  <tr className="border-b border-gray-200 dark:border-white/6">
                     <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                     <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
                     <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fridge SN</th>
@@ -155,7 +155,7 @@ export default function PosDetailPage() {
                     <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Cost</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.04]">
+                <tbody className="divide-y divide-gray-100 dark:divide-white/4">
                   {interventions.map((inv) => {
                     const cost = inv.costItems.reduce((s, c) => s + c.totalCost, 0);
                     return (

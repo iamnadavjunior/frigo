@@ -544,12 +544,12 @@ export default function SettingsPage() {
                       <th className="text-right px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 dark:divide-white/[0.04]">
+                  <tbody className="divide-y divide-gray-100 dark:divide-white/4">
                     {teamUsers.map((u) => (
-                      <tr key={u.id} className={`hover:bg-gray-50 dark:hover:bg-white/[0.02] ${!u.active ? "opacity-50" : ""}`}>
+                      <tr key={u.id} className={`hover:bg-gray-50 dark:hover:bg-white/2 ${!u.active ? "opacity-50" : ""}`}>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                            <div className="w-7 h-7 rounded-full bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
                               {u.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                             </div>
                             <span className="font-medium text-gray-800 dark:text-gray-200 truncate max-w-[140px]">{u.fullName}</span>

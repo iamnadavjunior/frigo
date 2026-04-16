@@ -151,7 +151,7 @@ export default function NewInterventionPage() {
         )}
 
         {/* Fridge Selection */}
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-4 space-y-4">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-4 space-y-4">
           <h2 className="text-sm font-medium text-gray-400">Equipment</h2>
 
           <div>
@@ -161,10 +161,10 @@ export default function NewInterventionPage() {
               placeholder="Type serial number or POS name..."
               value={fridgeSearch}
               onChange={(e) => setFridgeSearch(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+              className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
             />
             {fridges.length > 0 && !selectedFridge && (
-              <div className="mt-1 border border-gray-200 dark:border-white/[0.06] rounded-md max-h-48 overflow-y-auto bg-white dark:bg-[#141414]">
+              <div className="mt-1 border border-gray-200 dark:border-white/6 rounded-md max-h-48 overflow-y-auto bg-white dark:bg-[#141414]">
                 {fridges.map((f) => (
                   <button
                     type="button"
@@ -175,7 +175,7 @@ export default function NewInterventionPage() {
                       setFridgeSearch(f.serialNumber);
                       setFridges([]);
                     }}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-white/5 text-sm border-b border-gray-100 dark:border-white/[0.06] last:border-0"
+                    className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-white/5 text-sm border-b border-gray-100 dark:border-white/6 last:border-0"
                   >
                     <span className="font-medium text-gray-800 dark:text-gray-200 font-mono">{f.serialNumber}</span>
                     <span className="text-gray-500 ml-2">
@@ -188,7 +188,7 @@ export default function NewInterventionPage() {
           </div>
 
           {selectedFridge && (
-            <div className="bg-gray-50 dark:bg-white/[0.04] rounded p-3 text-sm flex items-center justify-between">
+            <div className="bg-gray-50 dark:bg-white/4 rounded p-3 text-sm flex items-center justify-between">
               <div>
                 <span className="font-medium font-mono text-gray-800 dark:text-gray-200">{selectedFridge.serialNumber}</span>
                 <span className="text-gray-500 ml-2">
@@ -211,7 +211,7 @@ export default function NewInterventionPage() {
         </div>
 
         {/* Intervention Type & Details */}
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-4 space-y-4">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-4 space-y-4">
           <h2 className="text-sm font-medium text-gray-400">Intervention Details</h2>
 
           <div className="grid grid-cols-2 gap-4">
@@ -220,7 +220,7 @@ export default function NewInterventionPage() {
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value as "MAINTENANCE" | "REPAIR")}
-                className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
               >
                 <option value="MAINTENANCE">Maintenance</option>
                 <option value="REPAIR">Repair</option>
@@ -233,7 +233,7 @@ export default function NewInterventionPage() {
                 value={interventionDate}
                 onChange={(e) => setInterventionDate(e.target.value)}
                 required
-                className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
               />
             </div>
           </div>
@@ -245,7 +245,7 @@ export default function NewInterventionPage() {
                 value={technicianId}
                 onChange={(e) => setTechnicianId(e.target.value)}
                 required
-                className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
               >
                 <option value="">Select technician</option>
                 {technicians.map((t) => (
@@ -258,7 +258,7 @@ export default function NewInterventionPage() {
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
               >
                 <option value="PENDING">Pending</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -274,7 +274,7 @@ export default function NewInterventionPage() {
               onChange={(e) => setIssueDescription(e.target.value)}
               rows={3}
               placeholder="Describe the issue found..."
-              className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 resize-none"
+              className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 resize-none"
             />
           </div>
 
@@ -285,7 +285,7 @@ export default function NewInterventionPage() {
               onChange={(e) => setWorkDone(e.target.value)}
               rows={3}
               placeholder="Describe the work done..."
-              className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 resize-none"
+              className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 resize-none"
             />
           </div>
 
@@ -296,13 +296,13 @@ export default function NewInterventionPage() {
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
               placeholder="Additional notes..."
-              className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 resize-none"
+              className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40 resize-none"
             />
           </div>
         </div>
 
         {/* Cost Items */}
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-4 space-y-4">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-4 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-medium text-gray-400">Cost Items</h2>
             <button
@@ -326,7 +326,7 @@ export default function NewInterventionPage() {
                       placeholder="Item / Part name"
                       value={item.itemName}
                       onChange={(e) => updateCostItem(index, "itemName", e.target.value)}
-                      className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                      className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                     />
                   </div>
                   <div className="w-20">
@@ -336,7 +336,7 @@ export default function NewInterventionPage() {
                       min="1"
                       value={item.quantity}
                       onChange={(e) => updateCostItem(index, "quantity", parseInt(e.target.value) || 1)}
-                      className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                      className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                     />
                   </div>
                   <div className="w-28">
@@ -346,7 +346,7 @@ export default function NewInterventionPage() {
                       min="0"
                       value={item.unitCost}
                       onChange={(e) => updateCostItem(index, "unitCost", parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+                      className="w-full px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-md text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
                     />
                   </div>
                   <div className="w-24 pt-2 text-right text-sm text-gray-400">
@@ -362,7 +362,7 @@ export default function NewInterventionPage() {
                 </div>
               ))}
               {costItems.length > 0 && (
-                <div className="text-right text-sm font-medium text-gray-800 dark:text-gray-200 pt-2 border-t border-gray-200 dark:border-white/[0.06]">
+                <div className="text-right text-sm font-medium text-gray-800 dark:text-gray-200 pt-2 border-t border-gray-200 dark:border-white/6">
                   Total: {totalCost.toLocaleString()} BIF
                 </div>
               )}

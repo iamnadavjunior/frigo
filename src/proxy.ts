@@ -19,13 +19,20 @@ export async function proxy(request: NextRequest) {
 
   const token = request.cookies.get("token")?.value;
   if (!token) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const payload = await verifyToken(token);
   if (!payload) {
-    const response = NextResponse.redirect(new URL("/login", request.url));
-    response.cookies.delete("token");
+    const response = pathname.startsWith("/api/")
+      ? NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      : NextResponse.redirect(new URL("/login", request.url));
+    if (!pathname.startsWith("/api/")) {
+      response.cookies.delete("token");
+    }
     return response;
   }
 
@@ -50,6 +57,9 @@ export async function proxy(request: NextRequest) {
     ];
     const isAllowed = allowed.some((p) => pathname.startsWith(p));
     if (!isAllowed) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
       return NextResponse.redirect(new URL("/technician/jobs", request.url));
     }
   }
@@ -69,6 +79,9 @@ export async function proxy(request: NextRequest) {
     ];
     const isAllowed = allowed.some((p) => pathname.startsWith(p));
     if (!isAllowed) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
       return NextResponse.redirect(new URL("/brarudi/alerts", request.url));
     }
   }
@@ -86,6 +99,9 @@ export async function proxy(request: NextRequest) {
     ];
     const isAllowed = allowed.some((p) => pathname.startsWith(p));
     if (!isAllowed) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
       return NextResponse.redirect(new URL("/brarudi-mgmt/cities", request.url));
     }
   }

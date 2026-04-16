@@ -100,7 +100,7 @@ export default function InterventionDetailPage() {
 
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         {/* Intervention Details */}
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-4">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-4">
           <h2 className="text-sm font-medium text-gray-400 mb-3">Intervention Details</h2>
           <div className="space-y-3 text-sm">
             <div>
@@ -145,7 +145,7 @@ export default function InterventionDetailPage() {
         </div>
 
         {/* Fridge & POS Info */}
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-4">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-4">
           <h2 className="text-sm font-medium text-gray-400 mb-3">Equipment & Location</h2>
           <div className="space-y-3 text-sm">
             <div>
@@ -178,21 +178,21 @@ export default function InterventionDetailPage() {
       {/* Cost Items */}
       <div className="mb-8">
         <h2 className="text-sm font-medium text-gray-400 mb-3">Cost Items</h2>
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] overflow-hidden">
+        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 overflow-hidden">
           {data.costItems.length === 0 ? (
             <div className="px-4 py-6 text-center text-gray-500 text-sm">No cost items recorded</div>
           ) : (
             <>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-white/[0.06]">
+                  <tr className="border-b border-gray-200 dark:border-white/6">
                     <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Item</th>
                     <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Qty</th>
                     <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Unit Cost</th>
                     <th className="text-right px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.04]">
+                <tbody className="divide-y divide-gray-100 dark:divide-white/4">
                   {data.costItems.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-white/5">
                       <td className="px-4 py-2.5 text-gray-800 dark:text-gray-200">{item.itemName}</td>
@@ -203,7 +203,7 @@ export default function InterventionDetailPage() {
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-gray-50 dark:bg-white/[0.03]">
+                  <tr className="bg-gray-50 dark:bg-white/3">
                     <td colSpan={3} className="px-4 py-2.5 text-right font-medium text-gray-400">Total</td>
                     <td className="px-4 py-2.5 text-right font-semibold text-gray-900 dark:text-white">{totalCost.toLocaleString()} BIF</td>
                   </tr>
@@ -218,7 +218,7 @@ export default function InterventionDetailPage() {
       {data.attachments.length > 0 && (
         <div>
           <h2 className="text-sm font-medium text-gray-400 mb-3">Attachments</h2>
-          <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] p-4">
+          <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/6 p-4">
             <div className="space-y-2">
               {data.attachments.map((att) => (
                 <div key={att.id} className="flex items-center justify-between py-1.5">
