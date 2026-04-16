@@ -19,8 +19,6 @@ services:
     restart: unless-stopped
     ports:
       - "${APP_PORT:-3000}:3000"
-    entrypoint: []
-    command: ["sh", "-c", "node scripts/init-db.cjs && exec node server.js"]
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-frigo}:${POSTGRES_PASSWORD:-frigoSecure2026}@db:5432/${POSTGRES_DB:-frigo}?schema=public"
       JWT_SECRET: ${JWT_SECRET:-change-this-to-a-secure-random-string-in-production}
