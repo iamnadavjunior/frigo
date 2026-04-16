@@ -48,9 +48,9 @@ COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 # Create uploads directory
 RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
 
-# Copy entrypoint and fix Windows line endings (CRLF -> LF)
+# Copy entrypoint and strip Windows line endings (CRLF -> LF)
 COPY docker-entrypoint.sh ./
-RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh
+RUN sed -i 's/\r$//' docker-entrypoint.sh
 
 USER nextjs
 
@@ -58,4 +58,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/sh", "docker-entrypoint.sh"]
