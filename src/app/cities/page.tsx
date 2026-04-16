@@ -43,6 +43,39 @@ function IcnTrash({ className = "w-4 h-4" }: { className?: string }) {
   );
 }
 
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const countRef = useRef<number>(0);
+  useEffect(() => {
+    if (target === countRef.current) return;
+    const start = countRef.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else countRef.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+function AnimatedStat({ label, value, color }: { label: string; value: number; color: string }) {
+  const animated = useCountUp(value);
+  return (
+    <div className="bg-white dark:bg-[#141414] px-4 py-2.5">
+      <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+      <div className={`text-lg font-bold ${color} mt-0.5 transition-all`}>{animated.toLocaleString()}</div>
+    </div>
+  );
+}
+
 export default function CitiesPage() {
   useAuth();
   const [cities, setCities] = useState<City[]>([]);
@@ -155,6 +188,15 @@ export default function CitiesPage() {
             {cities.length} {cities.length === 1 ? "city" : "cities"} registered
           </p>
         </div>
+
+        {/* Stats strip */}
+        {cities.length > 0 && (
+          <div className="grid grid-cols-3 gap-px bg-gray-200 dark:bg-white/6 rounded-xl overflow-hidden">
+            <AnimatedStat label="Cities" value={cities.length} color="text-gray-900 dark:text-white" />
+            <AnimatedStat label="Total POS" value={cities.reduce((s, c) => s + c.posCount, 0)} color="text-blue-500" />
+            <AnimatedStat label="Total Fridges" value={cities.reduce((s, c) => s + c.fridgeCount, 0)} color="text-emerald-500" />
+          </div>
+        )}
 
         {/* Add new city */}
         <div className="flex gap-3">

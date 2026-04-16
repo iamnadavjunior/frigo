@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import Link from "next/link";
@@ -57,6 +57,39 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    if (target === ref.current) return;
+    const start = ref.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else ref.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+function AnimatedKpi({ label, value, color, bg }: { label: string; value: number; color: string; bg: string }) {
+  const animated = useCountUp(value);
+  return (
+    <div className={`${bg} rounded-xl px-3 py-2.5 text-center`}>
+      <div className={`text-lg font-bold ${color} transition-all`}>{animated}</div>
+      <div className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">{label}</div>
+    </div>
+  );
+}
+
 /* ════════════════════════════════ Main Dashboard ════════════════════════════════ */
 export default function TechnicianDashboard() {
   const { user } = useAuth();
@@ -95,6 +128,12 @@ export default function TechnicianDashboard() {
     }
     fetchData().finally(() => setLoading(false));
   }, [user, router, fetchData]);
+
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const iv = setInterval(() => { fetchData(); }, 30_000);
+    return () => clearInterval(iv);
+  }, [fetchData]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -136,20 +175,13 @@ export default function TechnicianDashboard() {
           </button>
         </div>
 
-        {/* ════ KPI Strip ════ */}
+        {/* ════ KPI Strip — Animated ════ */}
         {stats && (
           <div className="grid grid-cols-4 gap-2">
-            {[
-              { label: "Actifs", value: String(stats.activeJobs), color: stats.activeJobs > 0 ? "text-blue-500" : "text-gray-900 dark:text-white", bg: "bg-blue-50 dark:bg-blue-500/8" },
-              { label: "Semaine", value: String(stats.completedThisWeek), color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/8" },
-              { label: "Mois", value: String(stats.completedThisMonth), color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-500/8" },
-              { label: "Total", value: String(stats.totalCompleted), color: "text-gray-900 dark:text-white", bg: "bg-gray-50 dark:bg-white/4" },
-            ].map((kpi) => (
-              <div key={kpi.label} className={`${kpi.bg} rounded-xl px-3 py-2.5 text-center`}>
-                <div className={`text-lg font-bold ${kpi.color}`}>{kpi.value}</div>
-                <div className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">{kpi.label}</div>
-              </div>
-            ))}
+            <AnimatedKpi label="Actifs" value={stats.activeJobs} color={stats.activeJobs > 0 ? "text-blue-500" : "text-gray-900 dark:text-white"} bg="bg-blue-50 dark:bg-blue-500/8" />
+            <AnimatedKpi label="Semaine" value={stats.completedThisWeek} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-500/8" />
+            <AnimatedKpi label="Mois" value={stats.completedThisMonth} color="text-violet-500" bg="bg-violet-50 dark:bg-violet-500/8" />
+            <AnimatedKpi label="Total" value={stats.totalCompleted} color="text-gray-900 dark:text-white" bg="bg-gray-50 dark:bg-white/4" />
           </div>
         )}
 

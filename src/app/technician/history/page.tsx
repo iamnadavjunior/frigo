@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import Link from "next/link";
@@ -36,6 +36,34 @@ interface HistoryResponse {
 /* ── Helpers ── */
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    if (target === ref.current) return;
+    const start = ref.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else ref.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+function AnimatedBadge({ value }: { value: number }) {
+  const animated = useCountUp(value);
+  return <span className="text-emerald-500 font-bold transition-all">{animated}</span>;
 }
 
 /* ════════════════════════════════════════════
@@ -87,8 +115,8 @@ export default function TechnicianHistoryPage() {
     <div className="flex-1 overflow-auto">
       <div className="max-w-lg mx-auto px-4 py-5 space-y-4">
 
-        {/* ════ Count badge ════ */}
-        <p className="text-xs text-gray-400">{total} intervention{total !== 1 ? "s" : ""} terminée{total !== 1 ? "s" : ""}</p>
+        {/* ════ Count badge — animated ════ */}
+        <p className="text-xs text-gray-400"><AnimatedBadge value={total} /> intervention{total !== 1 ? "s" : ""} terminée{total !== 1 ? "s" : ""}</p>
 
         {/* ════ Content ════ */}
         <div className="bg-white dark:bg-[#141414] rounded-2xl border border-gray-200 dark:border-white/6 overflow-hidden">

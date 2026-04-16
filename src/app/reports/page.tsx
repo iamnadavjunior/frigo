@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useAuth } from "@/components/auth-provider";
 import Link from "next/link";
 import * as XLSX from "xlsx";
@@ -54,6 +54,29 @@ interface ReportResponse {
 
 interface City { id: string; name: string }
 
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 900) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    if (target === ref.current) return;
+    const start = ref.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else ref.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
 /* ─── Helpers ─── */
 const fmtDateHead = (d: string) => new Date(d).toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
 const fmtRange = (from: string, to: string) => {
@@ -68,6 +91,45 @@ const fmtRange = (from: string, to: string) => {
   }
   return `${String(f.getDate()).padStart(2, "0")} ${months[f.getMonth()]} au ${String(t.getDate()).padStart(2, "0")} ${months[t.getMonth()]} ${t.getFullYear()}`;
 };
+
+/* ─── Day Bar Chart ─── */
+function DayBarChart({ dates, byDate, color }: { dates: string[]; byDate: Record<string, ReportEntry[]>; color: string }) {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const counts = dates.map(d => byDate[d]?.length || 0);
+  const max = Math.max(...counts, 1);
+  if (dates.length === 0) return <div className="h-28 flex items-center justify-center text-xs text-gray-400">Aucune donnée</div>;
+
+  return (
+    <div className="flex items-end gap-1" style={{ height: 110 }}>
+      {dates.map((dateKey, i) => {
+        const count = counts[i];
+        const pct = (count / max) * 100;
+        const dayLabel = new Date(dateKey).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+        return (
+          <div key={dateKey} className="flex flex-col items-center flex-1 relative"
+            onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}>
+            {hovered === i && (
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[10px] font-bold px-2 py-1 rounded-md whitespace-nowrap z-10 shadow-lg">
+                {count}
+              </div>
+            )}
+            <div
+              className="w-full rounded-t-sm transition-all duration-500 min-h-1"
+              style={{
+                height: `${Math.max(pct, 4)}%`,
+                backgroundColor: color,
+                opacity: hovered !== null && hovered !== i ? 0.35 : 1,
+              }}
+            />
+            <span className={`text-[8px] mt-1 transition-colors ${hovered === i ? "text-gray-900 dark:text-white font-bold" : "text-gray-400"}`}>
+              {dates.length <= 7 ? dayLabel : (i % Math.ceil(dates.length / 7) === 0 ? dayLabel : "")}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 /* ═══════════════════════════════════════════════════════════════ */
 export default function ReportsPage() {
@@ -310,7 +372,7 @@ export default function ReportsPage() {
             >
               Fiches en attente
               {pendingCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full bg-amber-500 text-white text-[10px] font-bold">
+                <span className="absolute -top-1.5 -right-1.5 min-w-4.5 h-4.5 flex items-center justify-center px-1 rounded-full bg-amber-500 text-white text-[10px] font-bold">
                   {pendingCount}
                 </span>
               )}
@@ -482,10 +544,31 @@ export default function ReportsPage() {
             <SummaryCard label="Total" value={String(report.summary.total)} color={tab === "repairs" ? "text-red-500" : "text-emerald-500"} />
             <SummaryCard label="Frigos" value={String(report.summary.uniqueFridges)} color="text-blue-500" />
             <SummaryCard label="PDV" value={String(report.summary.uniquePOS)} color="text-gray-900 dark:text-white" />
-            <SummaryCard label={tab === "repairs" ? "Coût Total" : "Coût"} value={report.summary.totalCost > 0 ? `${report.summary.totalCost.toLocaleString()} BIF` : "—"} color="text-orange-500" />
+            <SummaryCard label={tab === "repairs" ? "Coût Total" : "Coût"} value={report.summary.totalCost > 0 ? `${report.summary.totalCost.toLocaleString()} BIF` : "—"} color="text-orange-500" isBIF />
             <SummaryCard label="Flotte Totale" value={String(report.summary.totalFridgesInScope)} color="text-gray-900 dark:text-white" />
             <SummaryCard label={tab === "repairs" ? "Réparés" : "Entretenus"} value={String(report.summary.servicedCount)} color="text-emerald-500" />
             <SummaryCard label={tab === "repairs" ? "Non Réparés" : "Non Entretenus"} value={String(report.summary.nonServicedCount)} color={report.summary.nonServicedCount > 0 ? "text-red-500" : "text-emerald-500"} />
+          </div>
+        )}
+
+        {/* ── Visual Insights ── */}
+        {!loading && report && report.data.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Coverage Ring */}
+            <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 p-5">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Couverture de la flotte</h3>
+              <div className="flex items-center justify-around">
+                <ProgressRing value={report.summary.servicedCount} max={report.summary.totalFridgesInScope} label={tab === "repairs" ? "Réparés" : "Entretenus"} color={tab === "repairs" ? "#ef4444" : "#10b981"} />
+                <ProgressRing value={report.summary.nonServicedCount} max={report.summary.totalFridgesInScope} label={tab === "repairs" ? "Non Réparés" : "Non Entretenus"} color="#f59e0b" />
+                <ProgressRing value={report.summary.uniquePOS} max={report.summary.total} label="PDV uniques" color="#3b82f6" />
+              </div>
+            </div>
+
+            {/* Day-by-day mini bar chart */}
+            <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 p-5">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Interventions par jour</h3>
+              <DayBarChart dates={sortedDates} byDate={report.byDate} color={tab === "repairs" ? "#ef4444" : "#10b981"} />
+            </div>
           </div>
         )}
 
@@ -586,12 +669,42 @@ export default function ReportsPage() {
   );
 }
 
-/* ─── Shared Summary Card ─── */
-function SummaryCard({ label, value, color }: { label: string; value: string; color: string }) {
+/* ─── Shared Summary Card (Animated) ─── */
+function SummaryCard({ label, value, color, isBIF }: { label: string; value: string; color: string; isBIF?: boolean }) {
+  const numericVal = parseInt(value.replace(/[^0-9]/g, ""), 10);
+  const isNumeric = !isNaN(numericVal) && value !== "—";
+  const animated = useCountUp(isNumeric ? numericVal : 0);
+  const display = isNumeric ? (isBIF ? `${animated.toLocaleString()} BIF` : String(animated)) : value;
+
   return (
-    <div className="bg-white dark:bg-[#141414] px-4 py-3">
-      <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</div>
-      <div className={`text-xl font-bold mt-0.5 ${color}`}>{value}</div>
+    <div className="bg-white dark:bg-[#141414] px-4 py-3 group hover:bg-gray-50 dark:hover:bg-white/3 transition-all duration-200">
+      <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+      <div className={`text-xl font-bold mt-0.5 ${color} transition-transform duration-200 group-hover:scale-105 origin-left`}>{display}</div>
+    </div>
+  );
+}
+
+/* ─── Progress Ring ─── */
+function ProgressRing({ value, max, label, color }: { value: number; max: number; label: string; color: string }) {
+  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
+  const animated = useCountUp(pct);
+  const radius = 36;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (animated / 100) * circumference;
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="relative w-20 h-20">
+        <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r={radius} fill="none" stroke="currentColor" strokeWidth="6" className="text-gray-100 dark:text-white/6" />
+          <circle cx="40" cy="40" r={radius} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round"
+            strokeDasharray={circumference} strokeDashoffset={offset}
+            className="transition-all duration-1000 ease-out" />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-sm font-bold text-gray-900 dark:text-white">{animated}%</span>
+        </div>
+      </div>
+      <span className="text-[10px] text-gray-400 font-medium">{label}</span>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useAuth } from "@/components/auth-provider";
 import Link from "next/link";
 
@@ -85,6 +85,74 @@ function IcnPhone({ className = "w-4 h-4" }: { className?: string }) {
   return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" /></svg>;
 }
 
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    if (target === ref.current) return;
+    const start = ref.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else ref.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+/* ─── Animated Summary Card ─── */
+function SummaryKpi({ label, value, color, sub }: { label: string; value: number; color: string; sub: string }) {
+  const animated = useCountUp(value);
+  return (
+    <div className="bg-white dark:bg-[#141414] px-4 py-3 group hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors">
+      <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+      <div className="flex items-baseline gap-1 mt-0.5">
+        <span className={`text-xl font-bold ${color} transition-all`}>{animated}</span>
+      </div>
+      <div className="text-xs text-gray-400 mt-0.5">{sub}</div>
+    </div>
+  );
+}
+
+/* ─── Mini Urgency Donut ─── */
+function UrgencyDonut({ data }: { data: { label: string; value: number; color: string }[] }) {
+  const total = data.reduce((s, d) => s + d.value, 0);
+  if (total === 0) return null;
+  const r = 36, cx = 50, cy = 50, circum = 2 * Math.PI * r;
+  let offset = 0;
+  return (
+    <div className="flex items-center gap-3">
+      <svg viewBox="0 0 100 100" className="w-16 h-16 shrink-0 -rotate-90">
+        {data.filter(d => d.value > 0).map((d) => {
+          const pct = d.value / total;
+          const dash = circum * pct;
+          const gap = circum - dash;
+          const seg = <circle key={d.label} cx={cx} cy={cy} r={r} fill="none" stroke={d.color} strokeWidth={8} strokeDasharray={`${dash} ${gap}`} strokeDashoffset={-offset} strokeLinecap="round" className="transition-all duration-700" />;
+          offset += dash;
+          return seg;
+        })}
+      </svg>
+      <div className="flex flex-col gap-1">
+        {data.filter(d => d.value > 0).map(d => (
+          <div key={d.label} className="flex items-center gap-1.5 text-xs">
+            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.color }} />
+            <span className="text-gray-500 dark:text-gray-400">{d.label}</span>
+            <span className="font-semibold text-gray-700 dark:text-gray-300 ml-auto">{d.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════
    Service Requests Page
    ═══════════════════════════════════════════════════════════ */
@@ -98,6 +166,7 @@ export default function ServiceRequestsPage() {
   const [showNewModal, setShowNewModal] = useState(false);
   const [assignModal, setAssignModal] = useState<ServiceRequest | null>(null);
   const [detailPanel, setDetailPanel] = useState<ServiceRequest | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   const fetchAll = useCallback(() => {
     setLoading(true);
@@ -108,12 +177,19 @@ export default function ServiceRequestsPage() {
       .then(([sr, techs]) => {
         setRequests(sr);
         if (Array.isArray(techs)) setTechnicians(techs);
+        setLastRefresh(new Date());
       })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const iv = setInterval(fetchAll, 30_000);
+    return () => clearInterval(iv);
+  }, [fetchAll]);
 
   // Fetch technicians from users
   useEffect(() => {
@@ -138,6 +214,13 @@ export default function ServiceRequestsPage() {
     ASSIGNED: requests.filter(r => r.status === "ASSIGNED").length,
     IN_PROGRESS: requests.filter(r => r.status === "IN_PROGRESS").length,
     RESOLVED: requests.filter(r => r.status === "RESOLVED").length,
+  }), [requests]);
+
+  const urgencyCounts = useMemo(() => ({
+    CRITICAL: requests.filter(r => r.urgency === "CRITICAL" && r.status !== "RESOLVED" && r.status !== "CANCELLED").length,
+    HIGH: requests.filter(r => r.urgency === "HIGH" && r.status !== "RESOLVED" && r.status !== "CANCELLED").length,
+    MEDIUM: requests.filter(r => r.urgency === "MEDIUM" && r.status !== "RESOLVED" && r.status !== "CANCELLED").length,
+    LOW: requests.filter(r => r.urgency === "LOW" && r.status !== "RESOLVED" && r.status !== "CANCELLED").length,
   }), [requests]);
 
   /* ── Assign technician ── */
@@ -185,48 +268,50 @@ export default function ServiceRequestsPage() {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">Service Requests</h1>
             <p className="text-sm text-gray-500 mt-0.5">Manage repair &amp; maintenance requests — replaces the WhatsApp group</p>
           </div>
-          <button
-            onClick={() => setShowNewModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <IcnPlus className="w-4 h-4" />
-            New Request
-          </button>
-        </div>
-
-        {/* Summary cards */}
-        <div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-200 dark:bg-white/6 rounded-xl overflow-hidden">
-            <div className="bg-white dark:bg-[#141414] px-4 py-3">
-              <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Pending</div>
-              <div className="flex items-baseline gap-1 mt-0.5">
-                <span className="text-xl font-bold text-amber-500">{counts.PENDING}</span>
-              </div>
-              <div className="text-xs text-gray-400 mt-0.5">Awaiting assignment</div>
-            </div>
-            <div className="bg-white dark:bg-[#141414] px-4 py-3">
-              <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Assigned</div>
-              <div className="flex items-baseline gap-1 mt-0.5">
-                <span className="text-xl font-bold text-blue-500">{counts.ASSIGNED}</span>
-              </div>
-              <div className="text-xs text-gray-400 mt-0.5">Technician dispatched</div>
-            </div>
-            <div className="bg-white dark:bg-[#141414] px-4 py-3">
-              <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">In Progress</div>
-              <div className="flex items-baseline gap-1 mt-0.5">
-                <span className="text-xl font-bold text-indigo-500">{counts.IN_PROGRESS}</span>
-              </div>
-              <div className="text-xs text-gray-400 mt-0.5">Being worked on</div>
-            </div>
-            <div className="bg-white dark:bg-[#141414] px-4 py-3">
-              <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Resolved</div>
-              <div className="flex items-baseline gap-1 mt-0.5">
-                <span className="text-xl font-bold text-emerald-500">{counts.RESOLVED}</span>
-              </div>
-              <div className="text-xs text-gray-400 mt-0.5">Completed</div>
-            </div>
+          <div className="flex items-center gap-2">
+            {lastRefresh && (
+              <span className="text-xs text-gray-400 hidden sm:inline">
+                Updated {lastRefresh.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            )}
+            <button
+              onClick={fetchAll}
+              disabled={loading}
+              className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-white/6 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+              title="Refresh"
+            >
+              <svg className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+            </button>
+            <button
+              onClick={() => setShowNewModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <IcnPlus className="w-4 h-4" />
+              New Request
+            </button>
           </div>
         </div>
+
+        {/* Summary cards — animated */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-200 dark:bg-white/6 rounded-xl overflow-hidden">
+          <SummaryKpi label="Pending" value={counts.PENDING} color="text-amber-500" sub="Awaiting assignment" />
+          <SummaryKpi label="Assigned" value={counts.ASSIGNED} color="text-blue-500" sub="Technician dispatched" />
+          <SummaryKpi label="In Progress" value={counts.IN_PROGRESS} color="text-indigo-500" sub="Being worked on" />
+          <SummaryKpi label="Resolved" value={counts.RESOLVED} color="text-emerald-500" sub="Completed" />
+        </div>
+
+        {/* Urgency breakdown — mini donut */}
+        {(urgencyCounts.CRITICAL + urgencyCounts.HIGH + urgencyCounts.MEDIUM + urgencyCounts.LOW) > 0 && (
+          <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 px-4 py-3">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Active by Urgency</div>
+            <UrgencyDonut data={[
+              { label: "Critical", value: urgencyCounts.CRITICAL, color: "#ef4444" },
+              { label: "High", value: urgencyCounts.HIGH, color: "#f97316" },
+              { label: "Medium", value: urgencyCounts.MEDIUM, color: "#eab308" },
+              { label: "Low", value: urgencyCounts.LOW, color: "#9ca3af" },
+            ]} />
+          </div>
+        )}
 
         {/* Tabs */}
         <div>

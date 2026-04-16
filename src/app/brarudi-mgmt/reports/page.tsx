@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useAuth } from "@/components/auth-provider";
 import * as XLSX from "xlsx";
 
@@ -411,12 +411,40 @@ export default function BrarudiMgmtReportsPage() {
   );
 }
 
-/* ─── Shared Summary Card ─── */
+/* ─── Shared Summary Card — Animated ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    if (target === ref.current) return;
+    const start = ref.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else ref.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
 function SummaryCard({ label, value, color }: { label: string; value: string; color: string }) {
+  const numericVal = parseInt(value.replace(/[^\d]/g, ""), 10);
+  const isNumeric = !isNaN(numericVal) && /^\d/.test(value);
+  const animated = useCountUp(isNumeric ? numericVal : 0);
+  const suffix = isNumeric ? value.replace(/[\d,.\s]/g, "").trim() : "";
   return (
-    <div className="bg-white dark:bg-[#141414] px-4 py-3">
+    <div className="bg-white dark:bg-[#141414] px-4 py-3 group hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors">
       <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</div>
-      <div className={`text-xl font-bold mt-0.5 ${color}`}>{value}</div>
+      <div className={`text-xl font-bold mt-0.5 ${color} transition-all`}>
+        {isNumeric ? `${animated.toLocaleString()}${suffix ? ` ${suffix}` : ""}` : value}
+      </div>
     </div>
   );
 }

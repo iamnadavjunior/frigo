@@ -28,6 +28,39 @@ const pillTabs = [
   { key: "stats", label: "Résumé", icon: "M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" },
 ];
 
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const countRef = useRef<number>(0);
+  useEffect(() => {
+    if (target === countRef.current) return;
+    const start = countRef.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else countRef.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+function AnimatedStatCard({ value, label, color }: { value: number; label: string; color: string }) {
+  const animated = useCountUp(value);
+  return (
+    <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 p-3 text-center">
+      <div className={`text-2xl font-bold ${color} transition-all`}>{animated}</div>
+      <div className="text-[10px] text-gray-400 font-semibold uppercase">{label}</div>
+    </div>
+  );
+}
+
 /* ════════════════════════════════════════════════════════════════ */
 export default function BrarudiAlertPage() {
   const { user } = useAuth();
@@ -275,22 +308,10 @@ export default function BrarudiAlertPage() {
         {activeTab === "stats" && (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 p-3 text-center">
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</div>
-                <div className="text-[10px] text-gray-400 font-semibold uppercase">Total envoyé</div>
-              </div>
-              <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 p-3 text-center">
-                <div className="text-2xl font-bold text-amber-500">{stats.PENDING}</div>
-                <div className="text-[10px] text-gray-400 font-semibold uppercase">En attente</div>
-              </div>
-              <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 p-3 text-center">
-                <div className="text-2xl font-bold text-blue-500">{stats.ASSIGNED + stats.IN_PROGRESS}</div>
-                <div className="text-[10px] text-gray-400 font-semibold uppercase">En cours</div>
-              </div>
-              <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 p-3 text-center">
-                <div className="text-2xl font-bold text-emerald-500">{stats.RESOLVED}</div>
-                <div className="text-[10px] text-gray-400 font-semibold uppercase">Résolus</div>
-              </div>
+              <AnimatedStatCard value={stats.total} label="Total envoyé" color="text-gray-900 dark:text-white" />
+              <AnimatedStatCard value={stats.PENDING} label="En attente" color="text-amber-500" />
+              <AnimatedStatCard value={stats.ASSIGNED + stats.IN_PROGRESS} label="En cours" color="text-blue-500" />
+              <AnimatedStatCard value={stats.RESOLVED} label="Résolus" color="text-emerald-500" />
             </div>
 
             <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 p-3 space-y-2">

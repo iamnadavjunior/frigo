@@ -231,7 +231,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [alertCount, setAlertCount] = useState(0);
   const [alertData, setAlertData] = useState<{ pending: number; assigned: number; critical: number; total: number; recentRequests: AlertRequest[] }>({ pending: 0, assigned: 0, critical: 0, total: 0, recentRequests: [] });
   const [showAlertPanel, setShowAlertPanel] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const alertRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   /* Poll service request alerts */
   const fetchAlerts = useCallback(() => {
@@ -250,6 +252,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (alertRef.current && !alertRef.current.contains(e.target as Node)) setShowAlertPanel(false);
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) setShowUserMenu(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -280,8 +283,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const sidebarNav = (
     <div className={`flex flex-col h-full py-4 ${collapsed ? "items-center px-3" : "px-3"}`}>
       {/* Logo */}
-      <Link href="/dashboard" className={`flex items-center mb-4 shrink-0 ${collapsed ? "justify-center" : "px-2"}`}>
-        <span className={`font-black text-gray-900 dark:text-white tracking-widest ${collapsed ? "text-lg" : "text-3xl w-full text-center"}`}>{collapsed ? "C" : "CABU"}</span>
+      <Link href="/dashboard" className={`flex items-center mb-4 shrink-0 h-10 ${collapsed ? "justify-center" : "px-3"}`}>
+        <span className={`font-black text-gray-900 dark:text-white tracking-widest ${collapsed ? "text-lg" : "text-xl"}`}>{collapsed ? "C" : "CABU"}</span>
       </Link>
 
       {/* Nav icons */}
@@ -323,35 +326,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       </nav>
 
-      {/* Collapse button – desktop only */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className={`hidden lg:flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/4 dark:hover:text-gray-300 transition-all duration-200 mt-2 ${collapsed ? "mx-auto" : "ml-1"}`}
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        {collapsed ? <IcnChevronsRight className="w-4 h-4" /> : <IcnChevronsLeft className="w-4 h-4" />}
-      </button>
-
-      {/* Settings */}
-      <div className={`mt-2 ${collapsed ? "flex justify-center" : ""}`}>
-        <SidebarIconButton icon={IcnSettings} href="/settings" active={isActive("/settings")} label="Settings" collapsed={collapsed} onClick={() => setMobileOpen(false)} />
-      </div>
-
-      {/* User avatar */}
-      <div className={`mt-3 flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-white/10 ${collapsed ? "justify-center" : "px-1.5"}`}>
+      {/* Separator + Settings + Collapse on same line */}
+      <div className={`mt-2 border-t border-gray-200 dark:border-white/10 pt-2 flex items-center ${collapsed ? "flex-col gap-1" : "gap-1"}`}>
+        <div className="flex-1">
+          <SidebarIconButton icon={IcnSettings} href="/settings" active={isActive("/settings")} label="Settings" collapsed={collapsed} onClick={() => setMobileOpen(false)} />
+        </div>
         <button
-          onClick={logout}
-          title="Sign out"
-          className="w-9 h-9 rounded-full bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xs font-bold text-white hover:shadow-md transition-all duration-200 shrink-0"
+          onClick={() => setCollapsed(!collapsed)}
+          className="hidden lg:flex items-center justify-center w-8 h-8 shrink-0 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/4 dark:hover:text-gray-300 transition-all duration-200"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+          {collapsed ? <IcnChevronsRight className="w-4 h-4" /> : <IcnChevronsLeft className="w-4 h-4" />}
         </button>
-        {!collapsed && (
-          <div className="min-w-0">
-            <div className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{user.fullName}</div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 truncate">{meta.label}</div>
-          </div>
-        )}
       </div>
 
     </div>
@@ -383,13 +369,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 >
                   {theme === "dark" ? <IcnSun className="w-4 h-4 text-gray-400" /> : <IcnMoon className="w-4 h-4 text-gray-500" />}
                 </button>
-                <button
-                  onClick={logout}
-                  title="Déconnexion"
-                  className="w-9 h-9 rounded-full bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-bold text-white"
-                >
-                  {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
-                </button>
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setShowUserMenu(p => !p)}
+                    className="w-9 h-9 rounded-full bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center text-[10px] font-bold text-white"
+                  >
+                    {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </button>
+                  {showUserMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/10 shadow-xl z-50 overflow-hidden py-1">
+                      <div className="px-4 py-2.5 border-b border-gray-100 dark:border-white/6">
+                        <div className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{user.fullName}</div>
+                        <div className="text-xs text-gray-400 dark:text-gray-500 truncate">{meta.label}</div>
+                      </div>
+                      <Link href="/settings" onClick={() => setShowUserMenu(false)} className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/4 transition-colors">
+                        <IcnSettings className="w-4 h-4 text-gray-400" /> Settings
+                      </Link>
+                      <button onClick={() => { setShowUserMenu(false); logout(); }} className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>
+                        Log out
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -443,13 +445,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 >
                   {theme === "dark" ? <IcnSun className="w-4 h-4 text-gray-400" /> : <IcnMoon className="w-4 h-4 text-gray-500" />}
                 </button>
-                <button
-                  onClick={logout}
-                  title="Déconnexion"
-                  className="w-9 h-9 rounded-full bg-linear-to-br from-orange-400 to-amber-500 flex items-center justify-center text-[10px] font-bold text-white"
-                >
-                  {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
-                </button>
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setShowUserMenu(p => !p)}
+                    className="w-9 h-9 rounded-full bg-linear-to-br from-orange-400 to-amber-500 flex items-center justify-center text-[10px] font-bold text-white"
+                  >
+                    {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </button>
+                  {showUserMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/10 shadow-xl z-50 overflow-hidden py-1">
+                      <div className="px-4 py-2.5 border-b border-gray-100 dark:border-white/6">
+                        <div className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{user.fullName}</div>
+                        <div className="text-xs text-gray-400 dark:text-gray-500 truncate">{meta.label}</div>
+                      </div>
+                      <Link href="/settings" onClick={() => setShowUserMenu(false)} className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/4 transition-colors">
+                        <IcnSettings className="w-4 h-4 text-gray-400" /> Settings
+                      </Link>
+                      <button onClick={() => { setShowUserMenu(false); logout(); }} className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>
+                        Log out
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -521,13 +539,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 >
                   {theme === "dark" ? <IcnSun className="w-4 h-4 text-gray-400" /> : <IcnMoon className="w-4 h-4 text-gray-500" />}
                 </button>
-                <button
-                  onClick={logout}
-                  title="Déconnexion"
-                  className="w-9 h-9 rounded-full bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white"
-                >
-                  {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
-                </button>
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setShowUserMenu(p => !p)}
+                    className="w-9 h-9 rounded-full bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white"
+                  >
+                    {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                  </button>
+                  {showUserMenu && (
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/10 shadow-xl z-50 overflow-hidden py-1">
+                      <div className="px-4 py-2.5 border-b border-gray-100 dark:border-white/6">
+                        <div className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{user.fullName}</div>
+                        <div className="text-xs text-gray-400 dark:text-gray-500 truncate">{meta.label}</div>
+                      </div>
+                      <Link href="/settings" onClick={() => setShowUserMenu(false)} className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/4 transition-colors">
+                        <IcnSettings className="w-4 h-4 text-gray-400" /> Settings
+                      </Link>
+                      <button onClick={() => { setShowUserMenu(false); logout(); }} className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>
+                        Log out
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -565,9 +599,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Sidebar – desktop */}
-      <aside className={`hidden lg:flex lg:flex-col lg:shrink-0 ${sidebarWidth} bg-[#F8F9FC] dark:bg-[#0a0a0a] border-r border-gray-200 dark:border-white/6 sticky top-0 h-screen transition-all duration-300`}>
+      <aside className={`hidden lg:flex lg:flex-col lg:shrink-0 ${sidebarWidth} bg-[#F8F9FC] dark:bg-[#0a0a0a] border-r border-gray-200 dark:border-white/6 fixed top-0 left-0 h-screen z-30 transition-all duration-300`}>
         {sidebarNav}
       </aside>
+
+      {/* Spacer for fixed sidebar */}
+      <div className={`hidden lg:block lg:shrink-0 ${sidebarWidth} transition-all duration-300`} />
 
       {/* Sidebar – mobile (always expanded) */}
       <aside
@@ -577,8 +614,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       >
         {/* Force expanded in mobile */}
         <div className="flex flex-col h-full py-4 px-3">
-          <Link href="/dashboard" className="flex items-center mb-4 shrink-0 px-2">
-            <span className="text-3xl font-black text-gray-900 dark:text-white tracking-widest w-full text-center">CABU</span>
+          <Link href="/dashboard" className="flex items-center mb-4 shrink-0 h-10 px-3">
+            <span className="text-xl font-black text-gray-900 dark:text-white tracking-widest">CABU</span>
           </Link>
           <nav className="flex-1 flex flex-col gap-0.5">
             <div className="px-3 mb-1 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Analytics</div>
@@ -616,22 +653,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarIconButton icon={IcnReport} href="/reports" active={isActive("/reports")} label="Reports" collapsed={false} onClick={() => setMobileOpen(false)} />
             )}
           </nav>
-          {/* Settings */}
-          <div className="mt-2">
+          {/* Separator + Settings */}
+          <div className="mt-2 border-t border-gray-200 dark:border-white/10 pt-2">
             <SidebarIconButton icon={IcnSettings} href="/settings" active={isActive("/settings")} label="Settings" collapsed={false} onClick={() => setMobileOpen(false)} />
-          </div>
-          <div className="mt-3 flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-white/10 px-1.5">
-            <button
-              onClick={logout}
-              title="Sign out"
-              className="w-9 h-9 rounded-full bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xs font-bold text-white hover:shadow-md transition-all duration-200 shrink-0"
-            >
-              {user.fullName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
-            </button>
-            <div className="min-w-0">
-              <div className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{user.fullName}</div>
-              <div className="text-xs text-gray-400 dark:text-gray-500 truncate">{meta.label}</div>
-            </div>
           </div>
         </div>
       </aside>
@@ -741,14 +765,40 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               )}
             </div>
 
-            {/* User avatar */}
-            <button
-              onClick={logout}
-              title="Sign out"
-              className="w-8 h-8 rounded-full bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xs font-bold text-white hover:shadow-md transition-all shrink-0"
-            >
-              {user?.fullName?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
-            </button>
+            {/* User avatar + dropdown */}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setShowUserMenu(p => !p)}
+                className="w-8 h-8 rounded-full bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xs font-bold text-white hover:shadow-md transition-all shrink-0"
+              >
+                {user?.fullName?.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase() || "U"}
+              </button>
+              {showUserMenu && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-white/10 shadow-xl z-50 overflow-hidden py-1">
+                  <div className="px-4 py-2.5 border-b border-gray-100 dark:border-white/6">
+                    <div className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">{user?.fullName}</div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500 truncate">{meta.label}</div>
+                  </div>
+                  <Link
+                    href="/settings"
+                    onClick={() => setShowUserMenu(false)}
+                    className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/4 transition-colors"
+                  >
+                    <IcnSettings className="w-4 h-4 text-gray-400" />
+                    Settings
+                  </Link>
+                  <button
+                    onClick={() => { setShowUserMenu(false); logout(); }}
+                    className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                    </svg>
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

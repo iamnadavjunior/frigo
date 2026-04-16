@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "@/components/auth-provider";
 import Link from "next/link";
 
@@ -59,6 +59,39 @@ const urgencyStyle: Record<string, string> = {
   MEDIUM: "text-yellow-500",
   LOW: "text-gray-400",
 };
+
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    if (target === ref.current) return;
+    const start = ref.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else ref.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+function MiniStat({ label, value, color, bg }: { label: string; value: number; color: string; bg: string }) {
+  const animated = useCountUp(value);
+  return (
+    <div className={`${bg} rounded-lg px-2.5 py-1.5 text-center`}>
+      <div className={`text-sm font-bold ${color} transition-all`}>{animated}</div>
+      <div className="text-[9px] font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+    </div>
+  );
+}
 
 /* ════════════════════════════════════════════════════════════════
    Unified Activity / Tracking Page
@@ -143,6 +176,15 @@ export default function TechnicianActivityPage() {
             </button>
           ))}
         </div>
+
+        {/* ════ Summary Stats ════ */}
+        {data.length > 0 && (
+          <div className="grid grid-cols-3 gap-1.5">
+            <MiniStat label="Total" value={data.length} color="text-gray-900 dark:text-white" bg="bg-gray-50 dark:bg-white/4" />
+            <MiniStat label="Fiches" value={data.filter(d => d._kind === "fiche").length} color="text-teal-500" bg="bg-teal-50 dark:bg-teal-500/8" />
+            <MiniStat label="Tâches" value={data.filter(d => d._kind === "job").length} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-500/8" />
+          </div>
+        )}
 
         {/* ════ Search & Date Filters ════ */}
         <div className="space-y-1.5">

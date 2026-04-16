@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/components/auth-provider";
 
 interface City {
@@ -16,6 +16,39 @@ function IcnMapPin({ className = "w-4 h-4" }: { className?: string }) {
       <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
     </svg>
+  );
+}
+
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    if (target === ref.current) return;
+    const start = ref.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else ref.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+function AnimatedKpi({ label, value, color }: { label: string; value: number; color: string }) {
+  const animated = useCountUp(value);
+  return (
+    <div className="bg-white dark:bg-[#141414] px-4 py-3 group hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors">
+      <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+      <div className={`text-xl font-bold ${color} mt-0.5 transition-all`}>{animated.toLocaleString()}</div>
+    </div>
   );
 }
 
@@ -49,20 +82,11 @@ export default function BrarudiMgmtCitiesPage() {
   return (
     <div className="px-4 sm:px-6 py-6 space-y-5">
 
-      {/* ── KPI Strip ── */}
+      {/* ── KPI Strip — Animated ── */}
       <div className="grid grid-cols-3 gap-px bg-gray-200 dark:bg-white/6 rounded-xl overflow-hidden">
-        <div className="bg-white dark:bg-[#141414] px-4 py-3">
-          <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Communes</div>
-          <div className="text-xl font-bold text-gray-900 dark:text-white mt-0.5">{cities.length}</div>
-        </div>
-        <div className="bg-white dark:bg-[#141414] px-4 py-3">
-          <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Points de Vente</div>
-          <div className="text-xl font-bold text-blue-500 mt-0.5">{totalPos.toLocaleString()}</div>
-        </div>
-        <div className="bg-white dark:bg-[#141414] px-4 py-3">
-          <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">Frigos Total</div>
-          <div className="text-xl font-bold text-emerald-500 mt-0.5">{totalFridges.toLocaleString()}</div>
-        </div>
+        <AnimatedKpi label="Communes" value={cities.length} color="text-gray-900 dark:text-white" />
+        <AnimatedKpi label="Points de Vente" value={totalPos} color="text-blue-500" />
+        <AnimatedKpi label="Frigos Total" value={totalFridges} color="text-emerald-500" />
       </div>
 
       {/* ── City distribution cards ── */}
@@ -74,7 +98,7 @@ export default function BrarudiMgmtCitiesPage() {
           {cities.map((city) => {
             const pct = totalFridges > 0 ? Math.round((city.fridgeCount / totalFridges) * 100) : 0;
             return (
-              <div key={city.id} className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 transition-all overflow-hidden">
+              <div key={city.id} className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 transition-all overflow-hidden hover:shadow-md hover:border-blue-200 dark:hover:border-blue-500/20 hover:-translate-y-0.5 cursor-default">
                 <div className="h-1 bg-gray-100 dark:bg-white/4">
                   <div className="h-full bg-blue-500 rounded-r transition-all" style={{ width: `${Math.max(pct, 2)}%` }} />
                 </div>

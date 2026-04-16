@@ -8,8 +8,8 @@ import { AppLayout } from "@/components/layout/app-layout";
 const nunito = Nunito({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "KAGABO - Operations Platform",
-  description: "CABU & BRARUDI Refrigerator Operations Platform",
+  title: "Cabu × Brarudi - Fridge Management System",
+  description: "Cabu × Brarudi Fridge Management System",
   viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
 };
 

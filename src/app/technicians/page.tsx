@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 interface Technician {
   id: string;
@@ -9,6 +9,39 @@ interface Technician {
   role: string;
   active: boolean;
   createdAt: string;
+}
+
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    if (target === ref.current) return;
+    const start = ref.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else ref.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+function AnimatedStat({ label, value, color }: { label: string; value: number; color: string }) {
+  const animated = useCountUp(value);
+  return (
+    <div className="bg-white dark:bg-[#141414] px-4 py-2.5 group hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors">
+      <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+      <div className={`text-lg font-bold ${color} mt-0.5 transition-all`}>{animated}</div>
+    </div>
+  );
 }
 
 export default function TechniciansPage() {
@@ -57,6 +90,15 @@ export default function TechniciansPage() {
           </span>
         </div>
 
+        {/* Stats strip */}
+        {technicians.length > 0 && (
+          <div className="grid grid-cols-3 gap-px bg-gray-200 dark:bg-white/6 rounded-xl overflow-hidden">
+            <AnimatedStat label="Total" value={technicians.length} color="text-gray-900 dark:text-white" />
+            <AnimatedStat label="Active" value={technicians.filter(t => t.active).length} color="text-emerald-500" />
+            <AnimatedStat label="Inactive" value={technicians.filter(t => !t.active).length} color="text-gray-400" />
+          </div>
+        )}
+
         {/* Search */}
         <div className="flex flex-wrap gap-3 mb-4">
           <input
@@ -64,12 +106,12 @@ export default function TechniciansPage() {
             placeholder="Search by name or email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-3 py-2 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.06] rounded-md text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 w-64 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
+            className="px-3 py-2 bg-white dark:bg-white/6 border border-gray-200 dark:border-white/6 rounded-lg text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-500 w-64 focus:outline-none focus:ring-1 focus:ring-blue-500/40"
           />
         </div>
 
         {/* Table */}
-        <div className="bg-white dark:bg-[#141414] rounded-lg border border-gray-200 dark:border-white/[0.06] overflow-hidden">
+        <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 overflow-hidden">
           {loading ? (
             <div className="px-4 py-8 text-center text-gray-500 text-sm">
               Loading...
@@ -82,7 +124,7 @@ export default function TechniciansPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-white/[0.06]">
+                  <tr className="border-b border-gray-100 dark:border-white/5">
                     <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
@@ -97,7 +139,7 @@ export default function TechniciansPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.04]">
+                <tbody className="divide-y divide-gray-50 dark:divide-white/4">
                   {filtered.map((tech) => (
                     <tr
                       key={tech.id}
@@ -105,7 +147,7 @@ export default function TechniciansPage() {
                     >
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xs font-bold text-white shrink-0">
                             {tech.fullName
                               .split(" ")
                               .map((n) => n[0])

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Link from "next/link";
 
 /* ─── Types ─── */
@@ -25,6 +25,79 @@ const statusCfg: Record<string, { label: string; dot: string; bg: string; text: 
 
 const EMPTY_FORM = { serialNumber: "", posId: "", brand: "", refrigeratorType: "", cityId: "" };
 
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const ref = useRef<number>(0);
+  useEffect(() => {
+    if (target === ref.current) return;
+    const start = ref.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else ref.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+function AnimatedStat({ label, value, color }: { label: string; value: number; color: string }) {
+  const animated = useCountUp(value);
+  return (
+    <div className="bg-white dark:bg-[#141414] px-4 py-3 group hover:bg-gray-50/50 dark:hover:bg-white/2 transition-colors">
+      <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+      <div className={`text-xl font-bold mt-0.5 ${color} transition-all`}>{animated}</div>
+    </div>
+  );
+}
+
+/* ─── Status Donut ─── */
+function StatusDonut({ active, inactive, repair }: { active: number; inactive: number; repair: number }) {
+  const total = active + inactive + repair;
+  if (total === 0) return null;
+  const r = 36, cx = 50, cy = 50, circum = 2 * Math.PI * r;
+  const segs = [
+    { value: active, color: "#10b981", label: "Active" },
+    { value: inactive, color: "#9ca3af", label: "Inactive" },
+    { value: repair, color: "#f97316", label: "Repair" },
+  ].filter(s => s.value > 0);
+  let offset = 0;
+  return (
+    <div className="bg-white dark:bg-[#141414] rounded-xl border border-gray-200 dark:border-white/6 px-4 py-3">
+      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Status Distribution</div>
+      <div className="flex items-center gap-4">
+        <svg viewBox="0 0 100 100" className="w-16 h-16 shrink-0 -rotate-90">
+          {segs.map(s => {
+            const pct = s.value / total;
+            const dash = circum * pct;
+            const gap = circum - dash;
+            const seg = <circle key={s.label} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={8} strokeDasharray={`${dash} ${gap}`} strokeDashoffset={-offset} strokeLinecap="round" className="transition-all duration-700" />;
+            offset += dash;
+            return seg;
+          })}
+        </svg>
+        <div className="flex flex-col gap-1">
+          {segs.map(s => (
+            <div key={s.label} className="flex items-center gap-1.5 text-xs">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
+              <span className="text-gray-500 dark:text-gray-400">{s.label}</span>
+              <span className="font-semibold text-gray-700 dark:text-gray-300 ml-auto">{s.value}</span>
+              <span className="text-gray-400">({Math.round(s.value / total * 100)}%)</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function RefrigeratorsPage() {
   /* ── Data ── */
   const [fridges, setFridges] = useState<Fridge[]>([]);
@@ -48,15 +121,23 @@ export default function RefrigeratorsPage() {
     setLoading(true);
     fetch("/api/refrigerators?limit=2000")
       .then((r) => r.json())
-      .then((d) => setFridges(Array.isArray(d) ? d : []))
+      .then((d) => { setFridges(Array.isArray(d) ? d : []); setLastRefresh(new Date()); })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
+
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
 
   useEffect(() => {
     loadFridges();
     fetch("/api/cities").then((r) => r.json()).then((d) => setCities(Array.isArray(d) ? d : [])).catch(console.error);
     fetch("/api/pos?limit=5000").then((r) => r.json()).then((d: Record<string, unknown>) => { const arr = Array.isArray(d) ? d : Array.isArray(d?.data) ? d.data : []; setPosList(arr); }).catch(console.error);
+  }, [loadFridges]);
+
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const iv = setInterval(loadFridges, 30_000);
+    return () => clearInterval(iv);
   }, [loadFridges]);
 
   /* ── Filtered POS for add-form city selection ── */
@@ -137,6 +218,19 @@ export default function RefrigeratorsPage() {
             <h1 className="text-lg font-bold text-gray-900 dark:text-white">Fridge Management</h1>
             <p className="text-xs text-gray-400">Register and manage all refrigerators in the system</p>
           </div>
+          {lastRefresh && (
+            <span className="text-xs text-gray-400 hidden sm:inline">
+              Updated {lastRefresh.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
+          <button
+            onClick={loadFridges}
+            disabled={loading}
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-white/6 text-gray-500 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+            title="Refresh"
+          >
+            <svg className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+          </button>
           <button
             onClick={() => { setShowForm((v) => !v); setFormError(""); }}
             className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all ${
@@ -270,20 +364,16 @@ export default function RefrigeratorsPage() {
           </form>
         )}
 
-        {/* ════ Stats Strip ════ */}
+        {/* ════ Stats Strip — Animated ════ */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-gray-200 dark:bg-white/6 rounded-xl overflow-hidden">
-          {[
-            { label: "Total Fridges", value: stats.total, color: "text-gray-900 dark:text-white" },
-            { label: "Active", value: stats.active, color: "text-emerald-500" },
-            { label: "Inactive", value: stats.inactive, color: "text-gray-400" },
-            { label: "Under Repair", value: stats.repair, color: "text-orange-500" },
-          ].map((s) => (
-            <div key={s.label} className="bg-white dark:bg-[#141414] px-4 py-3">
-              <div className="text-xs font-medium text-gray-400 uppercase tracking-wider">{s.label}</div>
-              <div className={`text-xl font-bold mt-0.5 ${s.color}`}>{s.value}</div>
-            </div>
-          ))}
+          <AnimatedStat label="Total Fridges" value={stats.total} color="text-gray-900 dark:text-white" />
+          <AnimatedStat label="Active" value={stats.active} color="text-emerald-500" />
+          <AnimatedStat label="Inactive" value={stats.inactive} color="text-gray-400" />
+          <AnimatedStat label="Under Repair" value={stats.repair} color="text-orange-500" />
         </div>
+
+        {/* ════ Status Donut ════ */}
+        <StatusDonut active={stats.active} inactive={stats.inactive} repair={stats.repair} />
 
         {/* ════ Search + Filters ════ */}
         <div className="flex flex-wrap items-center gap-2">

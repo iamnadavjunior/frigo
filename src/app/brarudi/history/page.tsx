@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useAuth } from "@/components/auth-provider";
 
 /* ── Types ── */
@@ -32,6 +32,39 @@ const statusTabs = [
   { key: "ASSIGNED", label: "Assigné" },
   { key: "RESOLVED", label: "Résolu" },
 ];
+
+/* ─── Animated Counter Hook ─── */
+function useCountUp(target: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const countRef = useRef<number>(0);
+  useEffect(() => {
+    if (target === countRef.current) return;
+    const start = countRef.current;
+    const diff = target - start;
+    const startTime = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(start + diff * ease);
+      setValue(current);
+      if (progress < 1) requestAnimationFrame(tick);
+      else countRef.current = target;
+    };
+    requestAnimationFrame(tick);
+  }, [target, duration]);
+  return value;
+}
+
+function MiniKpi({ label, value, color, bg }: { label: string; value: number; color: string; bg: string }) {
+  const animated = useCountUp(value);
+  return (
+    <div className={`${bg} rounded-lg px-2 py-1.5 text-center`}>
+      <div className={`text-sm font-bold ${color} transition-all`}>{animated}</div>
+      <div className="text-[9px] font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+    </div>
+  );
+}
 
 /* ════════════════════════════════════════════════════════════════
    BRARUDI — Alert History Page
@@ -110,6 +143,16 @@ export default function BrarudiHistoryPage() {
             </button>
           ))}
         </div>
+
+        {/* ════ Summary Stats ════ */}
+        {data.length > 0 && (
+          <div className="grid grid-cols-4 gap-1.5">
+            <MiniKpi label="Total" value={data.length} color="text-gray-900 dark:text-white" bg="bg-gray-50 dark:bg-white/4" />
+            <MiniKpi label="Attente" value={data.filter(d => d.status === "PENDING").length} color="text-amber-500" bg="bg-amber-50 dark:bg-amber-500/8" />
+            <MiniKpi label="En cours" value={data.filter(d => d.status === "ASSIGNED" || d.status === "IN_PROGRESS").length} color="text-blue-500" bg="bg-blue-50 dark:bg-blue-500/8" />
+            <MiniKpi label="Résolu" value={data.filter(d => d.status === "RESOLVED").length} color="text-emerald-500" bg="bg-emerald-50 dark:bg-emerald-500/8" />
+          </div>
+        )}
 
         {/* ════ Search + Date ════ */}
         <div className="space-y-2">

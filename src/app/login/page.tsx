@@ -40,67 +40,84 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center mx-auto mb-3">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 3.75h13.5a1.5 1.5 0 0 1 1.5 1.5v13.5a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V5.25a1.5 1.5 0 0 1 1.5-1.5ZM3.75 10.5h16.5" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">KAGABO</h1>
-          <p className="text-sm text-gray-500 mt-1">Operations Platform</p>
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#0a0a0a] via-[#0d1117] to-[#0a0a0a] px-4">
+      <div className="w-full max-w-100">
+        {/* Brand */}
+        <div className="text-center mb-10">
+          <h1 className="text-2xl font-bold text-white tracking-tight">
+            Cabu <span className="text-blue-400 font-normal">×</span> Brarudi
+          </h1>
+          <p className="text-sm text-gray-500 mt-1.5 tracking-wide">Fridge Management System</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-[#141414] rounded-lg border border-white/[0.06] p-6 space-y-4">
+        {/* Card */}
+        <div className="bg-[#111318] rounded-2xl border border-white/6 p-7 shadow-2xl shadow-black/40">
+          <h2 className="text-lg font-semibold text-white mb-1">Welcome back</h2>
+          <p className="text-sm text-gray-500 mb-6">Sign in to your account to continue</p>
+
           {error && (
-            <div className="bg-red-500/10 text-red-400 text-sm px-3 py-2 rounded border border-red-500/20">
+            <div className="flex items-center gap-2 bg-red-500/10 text-red-400 text-sm px-4 py-2.5 rounded-lg border border-red-500/15 mb-5">
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+              </svg>
               {error}
             </div>
           )}
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-white/[0.1] rounded-md text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40"
-              placeholder="your@email.com"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1.5">
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                className="w-full px-3.5 py-2.5 bg-white/4 border border-white/8 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/30 transition-all"
+                placeholder="you@company.com"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              className="w-full px-3 py-2 bg-white dark:bg-white/[0.06] border border-white/[0.1] rounded-md text-sm text-gray-200 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40"
-              placeholder="••••••••"
-            />
-          </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-1.5">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="w-full px-3.5 py-2.5 bg-white/4 border border-white/8 rounded-xl text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/30 transition-all"
+                placeholder="••••••••"
+              />
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-500 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-500 text-white py-2.5 px-4 rounded-xl text-sm font-semibold hover:bg-blue-400 active:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30"
+            >
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Signing in…
+                </span>
+              ) : (
+                "Sign in"
+              )}
+            </button>
+          </form>
+        </div>
 
-        <p className="text-center text-xs text-gray-600 mt-6">CABU & BRARUDI Operations</p>
+        <p className="text-center text-xs text-gray-600 mt-8">© {new Date().getFullYear()} Cabu × Brarudi. All rights reserved.</p>
       </div>
     </div>
   );
