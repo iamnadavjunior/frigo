@@ -45,6 +45,10 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
 COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 
+# Copy seed files
+COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
+COPY --from=builder /app/prisma/seed.ts ./prisma/seed.ts
+
 # Create uploads directory
 RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
 
