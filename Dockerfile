@@ -46,9 +46,9 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 # Create uploads directory
 RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
 
-# Copy entrypoint
+# Copy entrypoint and fix Windows line endings (CRLF -> LF)
 COPY docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
+RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh
 
 USER nextjs
 
