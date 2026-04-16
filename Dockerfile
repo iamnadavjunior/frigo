@@ -21,6 +21,10 @@ RUN npx prisma generate
 # Build Next.js
 RUN npm run build
 
+# Compile seed script to plain JS (so it runs with just 'node' at startup)
+RUN npx esbuild prisma/seed.ts --bundle --platform=node --outfile=prisma/seed.cjs \
+    --external:@prisma/client --external:@prisma/adapter-pg --external:pg --external:bcryptjs --external:dotenv
+
 # ── Stage 3: Production runner ──
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -45,9 +49,9 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
 COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 
-# Copy seed files
+# Copy compiled seed script and its runtime deps
+COPY --from=builder /app/prisma/seed.cjs ./prisma/seed.cjs
 COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
-COPY --from=builder /app/prisma/seed.ts ./prisma/seed.ts
 
 # Create uploads directory
 RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
