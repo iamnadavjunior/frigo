@@ -48,14 +48,10 @@ COPY --from=builder /app/node_modules/dotenv ./node_modules/dotenv
 # Create uploads directory
 RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
 
-# Copy entrypoint and strip Windows line endings (CRLF -> LF)
-COPY docker-entrypoint.sh ./
-RUN sed -i 's/\r$//' docker-entrypoint.sh
-
 USER nextjs
 
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-ENTRYPOINT ["/bin/sh", "docker-entrypoint.sh"]
+CMD ["sh", "-c", "npx prisma migrate deploy || npx prisma db push --accept-data-loss || true; exec node server.js"]
