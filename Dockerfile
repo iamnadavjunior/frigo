@@ -11,6 +11,8 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Remove sub-apps from root build context (they're separate Docker services)
+RUN rm -rf apps/
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
