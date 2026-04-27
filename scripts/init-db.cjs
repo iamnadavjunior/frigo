@@ -29,6 +29,7 @@ async function main() {
     CREATE TABLE IF NOT EXISTS "users" (
       "id" TEXT NOT NULL DEFAULT gen_random_uuid()::text,
       "fullName" TEXT NOT NULL,
+      "username" TEXT NOT NULL,
       "email" TEXT NOT NULL,
       "passwordHash" TEXT NOT NULL,
       "role" "Role" NOT NULL,
@@ -38,6 +39,7 @@ async function main() {
       CONSTRAINT "users_pkey" PRIMARY KEY ("id")
     );
     CREATE UNIQUE INDEX IF NOT EXISTS "users_email_key" ON "users"("email");
+    CREATE UNIQUE INDEX IF NOT EXISTS "users_username_key" ON "users"("username");
   `);
 
   await client.query(`
@@ -164,34 +166,34 @@ async function main() {
   // Seed admin user
   const hash = await bcrypt.hash('BujaFrigori@2026', 10);
   await client.query(`
-    INSERT INTO "users" ("id", "fullName", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
-    VALUES (gen_random_uuid()::text, 'CabuFrigo', 'cabufrigo@cabu.bi', $1, 'ADMIN', true, NOW(), NOW())
+    INSERT INTO "users" ("id", "fullName", "username", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
+    VALUES (gen_random_uuid()::text, 'CabuFrigo', 'cabufrigo', 'cabufrigo@cabu.bi', $1, 'CABU_ADMIN', true, NOW(), NOW())
     ON CONFLICT ("email") DO NOTHING
   `, [hash]);
 
   const adminHash = await bcrypt.hash('admin123', 10);
   await client.query(`
-    INSERT INTO "users" ("id", "fullName", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
-    VALUES (gen_random_uuid()::text, 'Jean-Pierre Ndayishimiye', 'admin@cabu.bi', $1, 'ADMIN', true, NOW(), NOW())
+    INSERT INTO "users" ("id", "fullName", "username", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
+    VALUES (gen_random_uuid()::text, 'Jean-Pierre Ndayishimiye', 'admin', 'admin@cabu.bi', $1, 'CABU_ADMIN', true, NOW(), NOW())
     ON CONFLICT ("email") DO NOTHING
   `, [adminHash]);
 
   const techHash = await bcrypt.hash('tech123', 10);
   await client.query(`
-    INSERT INTO "users" ("id", "fullName", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
-    VALUES (gen_random_uuid()::text, 'Emmanuel Niyonzima', 'emmanuel@cabu.bi', $1, 'TECHNICIAN', true, NOW(), NOW())
+    INSERT INTO "users" ("id", "fullName", "username", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
+    VALUES (gen_random_uuid()::text, 'Emmanuel Niyonzima', 'emmanuel', 'emmanuel@cabu.bi', $1, 'TECHNICIAN', true, NOW(), NOW())
     ON CONFLICT ("email") DO NOTHING
   `, [techHash]);
   await client.query(`
-    INSERT INTO "users" ("id", "fullName", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
-    VALUES (gen_random_uuid()::text, 'Pascal Hakizimana', 'pascal@cabu.bi', $1, 'TECHNICIAN', true, NOW(), NOW())
+    INSERT INTO "users" ("id", "fullName", "username", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
+    VALUES (gen_random_uuid()::text, 'Pascal Hakizimana', 'pascal', 'pascal@cabu.bi', $1, 'TECHNICIAN', true, NOW(), NOW())
     ON CONFLICT ("email") DO NOTHING
   `, [techHash]);
 
   const brarudiHash = await bcrypt.hash('brarudi123', 10);
   await client.query(`
-    INSERT INTO "users" ("id", "fullName", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
-    VALUES (gen_random_uuid()::text, 'Marie Irakoze', 'monitor@brarudi.bi', $1, 'BRARUDI', true, NOW(), NOW())
+    INSERT INTO "users" ("id", "fullName", "username", "email", "passwordHash", "role", "active", "createdAt", "updatedAt")
+    VALUES (gen_random_uuid()::text, 'Marie Irakoze', 'marie', 'monitor@brarudi.bi', $1, 'BRARUDI_DELEGUE', true, NOW(), NOW())
     ON CONFLICT ("email") DO NOTHING
   `, [brarudiHash]);
 
