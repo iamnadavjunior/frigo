@@ -4,7 +4,7 @@ import { ExcelRow } from "@/lib/excel";
 
 export async function POST(request: NextRequest) {
   const role = request.headers.get("x-user-role");
-  if (role !== "ADMIN") {
+  if (role !== "CABU_ADMIN") {
     return NextResponse.json({ error: "Admin access required" }, { status: 403 });
   }
 

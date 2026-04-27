@@ -122,7 +122,7 @@ export default function TechnicianDashboard() {
 
   useEffect(() => {
     if (!user) return;
-    if (user.role !== "TECHNICIAN" && user.role !== "ADMIN") {
+    if (user.role !== "TECHNICIAN" && user.role !== "CABU_ADMIN") {
       router.replace("/dashboard");
       return;
     }

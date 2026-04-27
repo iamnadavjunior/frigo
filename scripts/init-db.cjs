@@ -10,7 +10,7 @@ async function main() {
 
   // Create enums
   const enums = [
-    `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'Role') THEN CREATE TYPE "Role" AS ENUM ('ADMIN','TECHNICIAN','BRARUDI','BRARUDI_MGMT'); END IF; END $$`,
+    `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'Role') THEN CREATE TYPE "Role" AS ENUM ('CABU_ADMIN','TECHNICIAN','BRARUDI_DELEGUE','BRARUDI_ADMIN'); END IF; END $$`,
     `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'InterventionType') THEN CREATE TYPE "InterventionType" AS ENUM ('MAINTENANCE','REPAIR'); END IF; END $$`,
     `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'InterventionStatus') THEN CREATE TYPE "InterventionStatus" AS ENUM ('PENDING','IN_PROGRESS','COMPLETED','CANCELLED'); END IF; END $$`,
     `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'FridgeStatus') THEN CREATE TYPE "FridgeStatus" AS ENUM ('ACTIVE','INACTIVE','UNDER_REPAIR'); END IF; END $$`,

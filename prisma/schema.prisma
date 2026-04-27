@@ -7,10 +7,10 @@ datasource db {
 }
 
 enum Role {
-  ADMIN
+  CABU_ADMIN
   TECHNICIAN
-  BRARUDI
-  BRARUDI_MGMT
+  BRARUDI_DELEGUE
+  BRARUDI_ADMIN
 }
 
 enum InterventionType {

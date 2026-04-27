@@ -26,7 +26,7 @@ async function main() {
       username: "cabufrigo",
       email: "cabufrigo@cabu.bi",
       passwordHash: cabuAdminPassword,
-      role: "ADMIN",
+      role: "CABU_ADMIN",
     },
   });
 
@@ -38,7 +38,7 @@ async function main() {
       username: "admin",
       email: "admin@cabu.bi",
       passwordHash: adminPassword,
-      role: "ADMIN",
+      role: "CABU_ADMIN",
     },
   });
 
@@ -74,7 +74,7 @@ async function main() {
       username: "marie",
       email: "monitor@brarudi.bi",
       passwordHash: brarudiPassword,
-      role: "BRARUDI",
+      role: "BRARUDI_DELEGUE",
     },
   });
 

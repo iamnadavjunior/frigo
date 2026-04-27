@@ -216,8 +216,8 @@ export default function DashboardPage() {
   /* Redirect technicians to their mobile dashboard */
   useEffect(() => {
     if (user?.role === "TECHNICIAN") router.replace("/technician/jobs");
-    if (user?.role === "BRARUDI") router.replace("/brarudi/alerts");
-    if (user?.role === "BRARUDI_MGMT") router.replace("/brarudi-mgmt/cities");
+    if (user?.role === "BRARUDI_DELEGUE") router.replace("/brarudi/alerts");
+    if (user?.role === "BRARUDI_ADMIN") router.replace("/brarudi-mgmt/cities");
   }, [user, router]);
 
   const fetchData = useCallback(() => {

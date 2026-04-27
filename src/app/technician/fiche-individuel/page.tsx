@@ -59,7 +59,7 @@ export default function FicheIndividuelPage() {
 
   /* ── Auth guard ── */
   useEffect(() => {
-    if (user && user.role !== "TECHNICIAN" && user.role !== "ADMIN") {
+    if (user && user.role !== "TECHNICIAN" && user.role !== "CABU_ADMIN") {
       router.replace("/dashboard");
     }
   }, [user, router]);

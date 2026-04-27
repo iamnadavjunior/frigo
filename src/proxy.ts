@@ -65,7 +65,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // BRARUDI delegates can only send alerts + view history + settings
-  if (payload.role === "BRARUDI") {
+  if (payload.role === "BRARUDI_DELEGUE") {
     const allowed = [
       "/brarudi",
       "/dashboard",
@@ -87,7 +87,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // BRARUDI Management can only view city distribution + reports
-  if (payload.role === "BRARUDI_MGMT") {
+  if (payload.role === "BRARUDI_ADMIN") {
     const allowed = [
       "/brarudi-mgmt",
       "/dashboard",

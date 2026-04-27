@@ -15,7 +15,9 @@ services:
       retries: 5
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
     ports:
       - "${APP_PORT:-3000}:3000"
@@ -26,6 +28,34 @@ services:
       UPLOAD_DIR: /app/uploads
     volumes:
       - uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  technician:
+    build:
+      context: .
+      dockerfile: apps/technician/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${TECHNICIAN_PORT:-3001}:3001"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-frigo}:${POSTGRES_PASSWORD:-frigoSecure2026}@db:5432/${POSTGRES_DB:-frigo}?schema=public"
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-secure-random-string-in-production}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  brarudi:
+    build:
+      context: .
+      dockerfile: apps/brarudi/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${BRARUDI_PORT:-3002}:3002"
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-frigo}:${POSTGRES_PASSWORD:-frigoSecure2026}@db:5432/${POSTGRES_DB:-frigo}?schema=public"
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-secure-random-string-in-production}
     depends_on:
       db:
         condition: service_healthy

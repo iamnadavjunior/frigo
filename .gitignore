@@ -10,6 +10,13 @@
 !.yarn/releases
 !.yarn/versions
 
+# sub-app dependencies and builds
+apps/*/node_modules
+apps/*/.next/
+apps/*/.env
+apps/*/tsconfig.tsbuildinfo
+apps/*/next-env.d.ts
+
 # testing
 /coverage
 

@@ -78,9 +78,10 @@ function generatePassword(): string {
 }
 
 const roleMeta: Record<string, { label: string; color: string }> = {
-  ADMIN: { label: "CABU Admin", color: "bg-violet-500 text-violet-50" },
+  CABU_ADMIN: { label: "CABU Admin", color: "bg-violet-500 text-violet-50" },
   TECHNICIAN: { label: "Technician", color: "bg-emerald-500 text-emerald-50" },
-  BRARUDI: { label: "BRARUDI", color: "bg-amber-500 text-amber-50" },
+  BRARUDI_DELEGUE: { label: "BRARUDI Délégué", color: "bg-amber-500 text-amber-50" },
+  BRARUDI_ADMIN: { label: "BRARUDI Admin", color: "bg-orange-500 text-orange-50" },
 };
 
 export default function SettingsPage() {

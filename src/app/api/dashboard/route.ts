@@ -73,12 +73,12 @@ export async function GET(request: NextRequest) {
     interventionsThisMonth,
   };
 
-  if (role === "ADMIN") {
-    return NextResponse.json({ role: "ADMIN", ...base });
+  if (role === "CABU_ADMIN") {
+    return NextResponse.json({ role: "CABU_ADMIN", ...base });
   }
 
-  if (role === "BRARUDI") {
-    return NextResponse.json({ role: "BRARUDI", ...base });
+  if (role === "BRARUDI_DELEGUE") {
+    return NextResponse.json({ role: "BRARUDI_DELEGUE", ...base });
   }
 
   if (role === "TECHNICIAN") {

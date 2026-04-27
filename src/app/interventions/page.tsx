@@ -176,7 +176,7 @@ export default function InterventionsListPage() {
   }, [fetchInterventions]);
 
   const totalPages = Math.ceil(total / 25);
-  const canCreate = user?.role === "ADMIN" || user?.role === "TECHNICIAN";
+  const canCreate = user?.role === "CABU_ADMIN" || user?.role === "TECHNICIAN";
 
   /* ── Compute stats from current page data ── */
   const stats = useMemo(() => {

@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const role = request.headers.get("x-user-role");
-  if (role !== "ADMIN" && role !== "TECHNICIAN") {
+  if (role !== "CABU_ADMIN" && role !== "TECHNICIAN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 /* ── GET /api/users ── admin-only: list all users ── */
 export async function GET(request: NextRequest) {
   const role = request.headers.get("x-user-role");
-  if (role !== "ADMIN") {
+  if (role !== "CABU_ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 /* ── POST /api/users ── admin-only: create a new account ── */
 export async function POST(request: NextRequest) {
   const role = request.headers.get("x-user-role");
-  if (role !== "ADMIN") {
+  if (role !== "CABU_ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "fullName, username, email, role, and password are required" }, { status: 400 });
   }
 
-  if (!["ADMIN", "TECHNICIAN", "BRARUDI"].includes(userRole)) {
+  if (!["CABU_ADMIN", "TECHNICIAN", "BRARUDI_DELEGUE"].includes(userRole)) {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 });
   }
 

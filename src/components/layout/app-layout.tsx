@@ -213,10 +213,10 @@ interface AlertRequest {
 }
 
 const roleMeta: Record<string, { label: string; color: string }> = {
-  ADMIN: { label: "CABU Admin", color: "bg-violet-500" },
+  CABU_ADMIN: { label: "CABU Admin", color: "bg-violet-500" },
   TECHNICIAN: { label: "Technician", color: "bg-emerald-500" },
-  BRARUDI: { label: "BRARUDI", color: "bg-amber-500" },
-  BRARUDI_MGMT: { label: "BRARUDI Management", color: "bg-orange-500" },
+  BRARUDI_DELEGUE: { label: "BRARUDI Délégué", color: "bg-amber-500" },
+  BRARUDI_ADMIN: { label: "BRARUDI Admin", color: "bg-orange-500" },
 };
 
 /* ════════════════════════════════════════════════════════════════
@@ -346,7 +346,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   /* ════════════════════════════════════════════════════════════════
      BRARUDI — Mobile-first layout for alert delegates
      ════════════════════════════════════════════════════════════════ */
-  if (user.role === "BRARUDI") {
+  if (user.role === "BRARUDI_DELEGUE") {
     const brarudiNavItems = [
       { icon: IcnDashboard, href: "/brarudi/alerts", label: "Accueil" },
       { icon: IcnClock, href: "/brarudi/history", label: "Historique" },
@@ -421,7 +421,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   /* ════════════════════════════════════════════════════════════════
      BRARUDI Management — Desktop sidebar, read-only cities + reports
      ════════════════════════════════════════════════════════════════ */
-  if (user.role === "BRARUDI_MGMT") {
+  if (user.role === "BRARUDI_ADMIN") {
     const mgmtNavItems = [
       { icon: IcnGlobe, href: "/brarudi-mgmt/cities", label: "Distribution" },
       { icon: IcnReport, href: "/brarudi-mgmt/reports", label: "Rapports" },

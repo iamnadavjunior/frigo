@@ -9,7 +9,7 @@ export async function PATCH(
 ) {
   const role = request.headers.get("x-user-role");
   const requesterId = request.headers.get("x-user-id");
-  if (role !== "ADMIN") {
+  if (role !== "CABU_ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
