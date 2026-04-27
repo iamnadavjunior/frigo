@@ -55,9 +55,10 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Standalone output: server.js + internal node_modules + public + static
-COPY --from=builder /app/apps/brarudi/public ./public
+# Next.js standalone mirrors the monorepo path: server.js is at apps/brarudi/server.js
 COPY --from=builder --chown=nextjs:nodejs /app/apps/brarudi/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/brarudi/.next/static ./.next/static
+COPY --from=builder /app/apps/brarudi/public ./apps/brarudi/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/brarudi/.next/static ./apps/brarudi/.next/static
 
 # Copy runtime-critical deps that standalone tracing may miss
 COPY --from=deps /app/node_modules/.prisma ./node_modules/.prisma
@@ -74,4 +75,4 @@ USER nextjs
 
 EXPOSE 3002
 
-CMD ["node", "server.js"]
+CMD ["node", "apps/brarudi/server.js"]
